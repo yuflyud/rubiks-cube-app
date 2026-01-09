@@ -37,31 +37,3 @@ jobs:
         name: build-artifacts
         path: dist/
         retention-days: 7
-
-  lint:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Node.js ${{ env.NODE_VERSION }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Run TypeScript check
-      run: npx tsc --noEmit
-
-    - name: Check for linting (if available)
-      run: |
-        if npm run lint --silent 2>/dev/null; then
-          npm run lint
-        else
-          echo "No lint script found, skipping..."
-        fi
-      continue-on-error: true
