@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature 2: Assembly Mechanism Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #8892b0;
+            font-size: 1rem;
+        }
+
+        /* Main Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .panel h2 {
+            font-size: 1.2rem;
+            color: #ccd6f6;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Input Panel */
+        .cube-preview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 4px;
+            max-width: 320px;
+            margin: 0 auto 20px;
+        }
+
+        .mini-face {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            padding: 3px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+        }
+
+        .mini-face-u { grid-column: 2; grid-row: 1; }
+        .mini-face-l { grid-column: 1; grid-row: 2; }
+        .mini-face-f { grid-column: 2; grid-row: 2; }
+        .mini-face-r { grid-column: 3; grid-row: 2; }
+        .mini-face-b { grid-column: 4; grid-row: 2; }
+        .mini-face-d { grid-column: 2; grid-row: 3; }
+
+        .mini-facelet {
+            aspect-ratio: 1;
+            border-radius: 2px;
+            min-width: 12px;
+            min-height: 12px;
+        }
+
+        /* Colors */
+        .color-white { background: #FFFFFF; }
+        .color-yellow { background: #FFD500; }
+        .color-green { background: #009B48; }
+        .color-blue { background: #0046AD; }
+        .color-orange { background: #FF5800; }
+        .color-red { background: #B71234; }
+
+        /* Status Section */
+        .status-section {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+
+        .status-value {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-value.valid {
+            color: #00ff88;
+        }
+
+        .status-value.pending {
+            color: #feca57;
+        }
+
+        .status-value.error {
+            color: #ff6b6b;
+        }
+
+        .status-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Calculate Button */
+        .btn-calculate {
+            width: 100%;
+            padding: 18px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            color: #1a1a2e;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-calculate:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-calculate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #feca57;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #ccd6f6;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .loading-subtext {
+            color: #8892b0;
+            font-size: 0.85rem;
+        }
+
+        /* Solution Output */
+        .solution-section {
+            display: none;
+        }
+
+        .solution-section.active {
+            display: block;
+        }
+
+        .solution-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .solution-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #8892b0;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        /* Move List */
+        .move-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .move-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .move-list::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+
+        .move-list::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+
+        .move-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .move-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .move-number {
+            width: 35px;
+            height: 35px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+
+        .move-notation {
+            font-family: 'Courier New', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #feca57;
+            min-width: 50px;
+        }
+
+        .move-details {
+            flex: 1;
+        }
+
+        .move-face {
+            color: #ccd6f6;
+            font-size: 0.9rem;
+        }
+
+        .move-direction {
+            color: #8892b0;
+            font-size: 0.8rem;
+        }
+
+        .move-arrow {
+            font-size: 1.5rem;
+            opacity: 0.5;
+        }
+
+        /* Notation Reference */
+        .notation-ref {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .notation-ref h3 {
+            color: #ccd6f6;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .notation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .notation-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .notation-symbol {
+            font-family: monospace;
+            font-weight: 700;
+            color: #feca57;
+            width: 30px;
+        }
+
+        .notation-desc {
+            color: #8892b0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #ccd6f6;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Algorithm Info */
+        .algorithm-info {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #8892b0;
+        }
+
+        .algorithm-info strong {
+            color: #ccd6f6;
+        }
+
+        /* Data Model Preview */
+        .data-model {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #8b949e;
+            overflow-x: auto;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .data-model .key {
+            color: #7ee787;
+        }
+
+        .data-model .string {
+            color: #a5d6ff;
+        }
+
+        .data-model .number {
+            color: #79c0ff;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            border-radius: 8px;
+            color: #8892b0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            background: rgba(254, 202, 87, 0.2);
+            color: #feca57;
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Assembly Mechanism</h1>
+            <p>Calculate the solution for your Rubik's cube configuration</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Input Panel -->
+            <div class="panel">
+                <h2>📥 Configuration Input</h2>
+                
+                <!-- Cube Preview -->
+                <div class="cube-preview" id="cubePreview">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <!-- Validation Status -->
+                <div class="status-section">
+                    <div class="status-row">
+                        <span class="status-label">Configuration Status</span>
+                        <span class="status-value valid" id="configStatus">
+                            <span class="status-icon">✓</span> Valid
+                        </span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Total Facelets</span>
+                        <span class="status-value" id="faceletCount">54/54</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Color Distribution</span>
+                        <span class="status-value valid" id="colorDist">
+                            <span class="status-icon">✓</span> Valid (9 each)
+                        </span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Cube Solvability</span>
+                        <span class="status-value valid" id="solvability">
+                            <span class="status-icon">✓</span> Solvable
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <button class="btn-calculate" id="calculateBtn">
+                    <span>🧮</span>
+                    Calculate Solution
+                </button>
+
+                <!-- Loading State -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Calculating optimal solution...</div>
+                    <div class="loading-subtext" id="loadingStep">Analyzing cube state</div>
+                </div>
+
+                <!-- Notation Reference -->
+                <div class="notation-ref">
+                    <h3>📖 Move Notation Reference</h3>
+                    <div class="notation-grid">
+                        <div class="notation-item">
+                            <span class="notation-symbol">U</span>
+                            <span class="notation-desc">Top ↻</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">U'</span>
+                            <span class="notation-desc">Top ↺</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">U2</span>
+                            <span class="notation-desc">Top 180°</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">D</span>
+                            <span class="notation-desc">Bottom ↻</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">D'</span>
+                            <span class="notation-desc">Bottom ↺</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">D2</span>
+                            <span class="notation-desc">Bottom 180°</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">R</span>
+                            <span class="notation-desc">Right ↻</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">R'</span>
+                            <span class="notation-desc">Right ↺</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">R2</span>
+                            <span class="notation-desc">Right 180°</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">L</span>
+                            <span class="notation-desc">Left ↻</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">L'</span>
+                            <span class="notation-desc">Left ↺</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">L2</span>
+                            <span class="notation-desc">Left 180°</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">F</span>
+                            <span class="notation-desc">Front ↻</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">F'</span>
+                            <span class="notation-desc">Front ↺</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">F2</span>
+                            <span class="notation-desc">Front 180°</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">B</span>
+                            <span class="notation-desc">Back ↻</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">B'</span>
+                            <span class="notation-desc">Back ↺</span>
+                        </div>
+                        <div class="notation-item">
+                            <span class="notation-symbol">B2</span>
+                            <span class="notation-desc">Back 180°</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="panel">
+                <h2>📤 Solution Output</h2>
+                
+                <div class="solution-section" id="solutionInitial">
+                    <div style="text-align: center; padding: 60px 20px; color: #8892b0;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🎯</div>
+                        <p style="font-size: 1rem;">Click "Calculate Solution" to generate the solving sequence</p>
+                        <p style="font-size: 0.85rem; margin-top: 10px;">The algorithm will find the optimal path to solve your cube</p>
+                    </div>
+                </div>
+
+                <div class="solution-section" id="solutionResult">
+                    <!-- Solution Stats -->
+                    <div class="solution-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalMoves">23</div>
+                            <div class="stat-label">Total Moves</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="calcTime">1.2s</div>
+                            <div class="stat-label">Calc Time</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="efficiency">Near-Optimal</div>
+                            <div class="stat-label">Solution Type</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <button class="tab active" data-tab="moves">Move Sequence</button>
+                        <button class="tab" data-tab="data">Data Model</button>
+                    </div>
+
+                    <!-- Move List Tab -->
+                    <div class="tab-content active" id="tab-moves">
+                        <div class="move-list" id="moveList">
+                            <!-- Moves will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Data Model Tab -->
+                    <div class="tab-content" id="tab-data">
+                        <div class="data-model" id="dataModel">
+                            <!-- JSON will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Algorithm Info -->
+                    <div class="algorithm-info">
+                        <strong>Algorithm:</strong> Kociemba's Two-Phase Algorithm<br>
+                        <strong>Phase 1:</strong> Reduce to &lt;U, D, R2, L2, F2, B2&gt; group<br>
+                        <strong>Phase 2:</strong> Solve using domino reduction
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" id="recalculateBtn">↺ Recalculate</button>
+                        <button class="btn btn-primary" id="visualizeBtn">▶ Visualize Solution</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample cube state (scrambled)
+        const sampleCubeState = {
+            U: ['orange', 'blue', 'red', 'yellow', 'white', 'green', 'white', 'orange', 'blue'],
+            D: ['red', 'green', 'yellow', 'blue', 'yellow', 'red', 'orange', 'white', 'green'],
+            F: ['yellow', 'red', 'white', 'orange', 'green', 'blue', 'yellow', 'yellow', 'orange'],
+            B: ['green', 'white', 'orange', 'green', 'blue', 'yellow', 'red', 'orange', 'blue'],
+            L: ['white', 'blue', 'green', 'white', 'orange', 'red', 'blue', 'green', 'white'],
+            R: ['blue', 'orange', 'yellow', 'red', 'red', 'white', 'green', 'yellow', 'red']
+        };
+
+        // Sample solution moves
+        const sampleSolution = [
+            { notation: "R", face: "Right", direction: "clockwise", degrees: 90 },
+            { notation: "U", face: "Up", direction: "clockwise", degrees: 90 },
+            { notation: "R'", face: "Right", direction: "counter-clockwise", degrees: 90 },
+            { notation: "U'", face: "Up", direction: "counter-clockwise", degrees: 90 },
+            { notation: "R", face: "Right", direction: "clockwise", degrees: 90 },
+            { notation: "U", face: "Up", direction: "clockwise", degrees: 90 },
+            { notation: "R'", face: "Right", direction: "counter-clockwise", degrees: 90 },
+            { notation: "F2", face: "Front", direction: "double", degrees: 180 },
+            { notation: "L", face: "Left", direction: "clockwise", degrees: 90 },
+            { notation: "D'", face: "Down", direction: "counter-clockwise", degrees: 90 },
+            { notation: "B", face: "Back", direction: "clockwise", degrees: 90 },
+            { notation: "U2", face: "Up", direction: "double", degrees: 180 },
+            { notation: "R'", face: "Right", direction: "counter-clockwise", degrees: 90 },
+            { notation: "D", face: "Down", direction: "clockwise", degrees: 90 },
+            { notation: "L'", face: "Left", direction: "counter-clockwise", degrees: 90 },
+            { notation: "U", face: "Up", direction: "clockwise", degrees: 90 },
+            { notation: "F", face: "Front", direction: "clockwise", degrees: 90 },
+            { notation: "B'", face: "Back", direction: "counter-clockwise", degrees: 90 },
+            { notation: "R2", face: "Right", direction: "double", degrees: 180 },
+            { notation: "U'", face: "Up", direction: "counter-clockwise", degrees: 90 },
+            { notation: "L", face: "Left", direction: "clockwise", degrees: 90 },
+            { notation: "D2", face: "Down", direction: "double", degrees: 180 },
+            { notation: "F'", face: "Front", direction: "counter-clockwise", degrees: 90 }
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCubePreview();
+            setupEventListeners();
+            document.getElementById('solutionInitial').classList.add('active');
+        });
+
+        function renderCubePreview() {
+            const preview = document.getElementById('cubePreview');
+            const faces = ['U', 'L', 'F', 'R', 'B', 'D'];
+            
+            faces.forEach(face => {
+                const faceDiv = document.createElement('div');
+                faceDiv.className = `mini-face mini-face-${face.toLowerCase()}`;
+                
+                sampleCubeState[face].forEach(color => {
+                    const facelet = document.createElement('div');
+                    facelet.className = `mini-facelet color-${color}`;
+                    faceDiv.appendChild(facelet);
+                });
+                
+                preview.appendChild(faceDiv);
+            });
+        }
+
+        function setupEventListeners() {
+            // Calculate button
+            document.getElementById('calculateBtn').addEventListener('click', calculateSolution);
+            
+            // Recalculate button
+            document.getElementById('recalculateBtn').addEventListener('click', () => {
+                document.getElementById('solutionResult').classList.remove('active');
+                document.getElementById('solutionInitial').classList.add('active');
+                calculateSolution();
+            });
+            
+            // Visualize button
+            document.getElementById('visualizeBtn').addEventListener('click', () => {
+                alert('Navigating to Visualization feature...\n\nThis would open the step-by-step animated solution viewer.');
+            });
+            
+            // Tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+        }
+
+        function calculateSolution() {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const loading = document.getElementById('loading');
+            const loadingStep = document.getElementById('loadingStep');
+            
+            calculateBtn.disabled = true;
+            loading.classList.add('active');
+            document.getElementById('solutionInitial').classList.remove('active');
+            
+            const steps = [
+                'Analyzing cube state...',
+                'Building phase 1 tables...',
+                'Searching phase 1 solution...',
+                'Building phase 2 tables...',
+                'Searching phase 2 solution...',
+                'Optimizing move sequence...',
+                'Generating output...'
+            ];
+            
+            let stepIndex = 0;
+            const stepInterval = setInterval(() => {
+                loadingStep.textContent = steps[stepIndex];
+                stepIndex++;
+                
+                if (stepIndex >= steps.length) {
+                    clearInterval(stepInterval);
+                    setTimeout(() => {
+                        loading.classList.remove('active');
+                        calculateBtn.disabled = false;
+                        showSolution();
+                    }, 300);
+                }
+            }, 250);
+        }
+
+        function showSolution() {
+            document.getElementById('solutionInitial').classList.remove('active');
+            document.getElementById('solutionResult').classList.add('active');
+            
+            // Update stats
+            document.getElementById('totalMoves').textContent = sampleSolution.length;
+            
+            // Render move list
+            const moveList = document.getElementById('moveList');
+            moveList.innerHTML = '';
+            
+            sampleSolution.forEach((move, index) => {
+                const moveItem = document.createElement('div');
+                moveItem.className = 'move-item';
+                
+                const directionArrow = move.direction === 'clockwise' ? '↻' : 
+                                       move.direction === 'counter-clockwise' ? '↺' : '↔';
+                
+                moveItem.innerHTML = `
+                    <div class="move-number">${index + 1}</div>
+                    <div class="move-notation">${move.notation}</div>
+                    <div class="move-details">
+                        <div class="move-face">${move.face} face</div>
+                        <div class="move-direction">${move.direction} • ${move.degrees}°</div>
+                    </div>
+                    <div class="move-arrow">${directionArrow}</div>
+                `;
+                
+                moveList.appendChild(moveItem);
+            });
+            
+            // Render data model
+            const dataModel = document.getElementById('dataModel');
+            const solutionData = {
+                initialState: sampleCubeState,
+                increments: sampleSolution.map((move, index) => ({
+                    stepNumber: index + 1,
+                    notation: move.notation,
+                    face: move.face,
+                    direction: move.direction,
+                    degrees: move.degrees,
+                    description: `Rotate ${move.face} face ${move.direction} ${move.degrees}°`
+                })),
+                totalMoves: sampleSolution.length,
+                algorithmUsed: "Kociemba Two-Phase",
+                calculationTimeMs: 1247
+            };
+            
+            dataModel.innerHTML = syntaxHighlight(JSON.stringify(solutionData, null, 2));
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tabId);
+            });
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.toggle('active', c.id === `tab-${tabId}`);
+            });
+        }
+
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    } else {
+                        cls = 'string';
+                    }
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+    </script>
+</body>
+</html>

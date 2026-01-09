@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature 1: Cube Configuration Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #8892b0;
+            font-size: 1rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-header h3 {
+            font-size: 1rem;
+            color: #ccd6f6;
+        }
+
+        .progress-header span {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .face-indicators {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .face-indicator {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .face-indicator.pending {
+            background: rgba(255,255,255,0.1);
+            color: #8892b0;
+        }
+
+        .face-indicator.active {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+
+        .face-indicator.completed {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        /* Main Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cube Display */
+        .cube-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .cube-unfolded {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .face {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            padding: 5px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .face.highlighted {
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+            transform: scale(1.02);
+        }
+
+        /* Face Positions in Unfolded Layout */
+        .face-u { grid-column: 2; grid-row: 1; }
+        .face-l { grid-column: 1; grid-row: 2; }
+        .face-f { grid-column: 2; grid-row: 2; }
+        .face-r { grid-column: 3; grid-row: 2; }
+        .face-b { grid-column: 4; grid-row: 2; }
+        .face-d { grid-column: 2; grid-row: 3; }
+
+        .facelet {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid rgba(255,255,255,0.2);
+            min-width: 30px;
+            min-height: 30px;
+        }
+
+        .facelet:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .facelet.selected {
+            border-color: #00d9ff;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.7);
+        }
+
+        .facelet.center {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .facelet.unassigned {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Colors */
+        .color-white { background: #FFFFFF; }
+        .color-yellow { background: #FFD500; }
+        .color-green { background: #009B48; }
+        .color-blue { background: #0046AD; }
+        .color-orange { background: #FF5800; }
+        .color-red { background: #B71234; }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .panel h3 {
+            font-size: 1rem;
+            color: #ccd6f6;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Color Palette */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .color-btn {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #000;
+            text-shadow: 0 0 3px rgba(255,255,255,0.5);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border-color: #00d9ff;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+
+        .color-btn.color-white { background: #FFFFFF; color: #333; }
+        .color-btn.color-yellow { background: #FFD500; color: #333; }
+        .color-btn.color-green { background: #009B48; color: #fff; }
+        .color-btn.color-blue { background: #0046AD; color: #fff; }
+        .color-btn.color-orange { background: #FF5800; color: #fff; }
+        .color-btn.color-red { background: #B71234; color: #fff; }
+
+        /* Color Counter */
+        .color-counter {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .counter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .counter-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .counter-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .counter-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .counter-fill.valid { background: #00ff88; }
+        .counter-fill.invalid { background: #ff4444; }
+        .counter-fill.partial { background: #ffaa00; }
+
+        .counter-value {
+            width: 30px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: #8892b0;
+        }
+
+        /* Instructions */
+        .instructions {
+            font-size: 0.9rem;
+            color: #8892b0;
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            color: #00d9ff;
+        }
+
+        /* Validation Messages */
+        .validation {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .validation.error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff8888;
+        }
+
+        .validation.success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .validation.warning {
+            background: rgba(255, 170, 0, 0.2);
+            border: 1px solid #ffaa00;
+            color: #ffcc00;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #ccd6f6;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts {
+            font-size: 0.8rem;
+            color: #5a6a8a;
+        }
+
+        .shortcuts kbd {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        /* Face Label */
+        .face-label {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #8892b0;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Cube Configuration</h1>
+            <p>Assign colors to match your physical Rubik's cube</p>
+        </header>
+
+        <!-- Progress Section -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <h3>Configuration Progress</h3>
+                <span id="progressText">0% Complete</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="face-indicators">
+                <div class="face-indicator active" data-face="U">⬜ Top (White)</div>
+                <div class="face-indicator pending" data-face="F">🟩 Front (Green)</div>
+                <div class="face-indicator pending" data-face="R">🟥 Right (Red)</div>
+                <div class="face-indicator pending" data-face="B">🟦 Back (Blue)</div>
+                <div class="face-indicator pending" data-face="L">🟧 Left (Orange)</div>
+                <div class="face-indicator pending" data-face="D">🟨 Bottom (Yellow)</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Cube Display -->
+            <div class="cube-section">
+                <div class="cube-unfolded">
+                    <!-- Up Face (White center) -->
+                    <div class="face face-u highlighted" data-face="U">
+                        <div class="facelet unassigned" data-pos="0"></div>
+                        <div class="facelet unassigned" data-pos="1"></div>
+                        <div class="facelet unassigned" data-pos="2"></div>
+                        <div class="facelet unassigned" data-pos="3"></div>
+                        <div class="facelet center color-white" data-pos="4"></div>
+                        <div class="facelet unassigned" data-pos="5"></div>
+                        <div class="facelet unassigned" data-pos="6"></div>
+                        <div class="facelet unassigned" data-pos="7"></div>
+                        <div class="facelet unassigned" data-pos="8"></div>
+                    </div>
+                    
+                    <!-- Left Face (Orange center) -->
+                    <div class="face face-l" data-face="L">
+                        <div class="facelet unassigned" data-pos="0"></div>
+                        <div class="facelet unassigned" data-pos="1"></div>
+                        <div class="facelet unassigned" data-pos="2"></div>
+                        <div class="facelet unassigned" data-pos="3"></div>
+                        <div class="facelet center color-orange" data-pos="4"></div>
+                        <div class="facelet unassigned" data-pos="5"></div>
+                        <div class="facelet unassigned" data-pos="6"></div>
+                        <div class="facelet unassigned" data-pos="7"></div>
+                        <div class="facelet unassigned" data-pos="8"></div>
+                    </div>
+                    
+                    <!-- Front Face (Green center) -->
+                    <div class="face face-f" data-face="F">
+                        <div class="facelet unassigned" data-pos="0"></div>
+                        <div class="facelet unassigned" data-pos="1"></div>
+                        <div class="facelet unassigned" data-pos="2"></div>
+                        <div class="facelet unassigned" data-pos="3"></div>
+                        <div class="facelet center color-green" data-pos="4"></div>
+                        <div class="facelet unassigned" data-pos="5"></div>
+                        <div class="facelet unassigned" data-pos="6"></div>
+                        <div class="facelet unassigned" data-pos="7"></div>
+                        <div class="facelet unassigned" data-pos="8"></div>
+                    </div>
+                    
+                    <!-- Right Face (Red center) -->
+                    <div class="face face-r" data-face="R">
+                        <div class="facelet unassigned" data-pos="0"></div>
+                        <div class="facelet unassigned" data-pos="1"></div>
+                        <div class="facelet unassigned" data-pos="2"></div>
+                        <div class="facelet unassigned" data-pos="3"></div>
+                        <div class="facelet center color-red" data-pos="4"></div>
+                        <div class="facelet unassigned" data-pos="5"></div>
+                        <div class="facelet unassigned" data-pos="6"></div>
+                        <div class="facelet unassigned" data-pos="7"></div>
+                        <div class="facelet unassigned" data-pos="8"></div>
+                    </div>
+                    
+                    <!-- Back Face (Blue center) -->
+                    <div class="face face-b" data-face="B">
+                        <div class="facelet unassigned" data-pos="0"></div>
+                        <div class="facelet unassigned" data-pos="1"></div>
+                        <div class="facelet unassigned" data-pos="2"></div>
+                        <div class="facelet unassigned" data-pos="3"></div>
+                        <div class="facelet center color-blue" data-pos="4"></div>
+                        <div class="facelet unassigned" data-pos="5"></div>
+                        <div class="facelet unassigned" data-pos="6"></div>
+                        <div class="facelet unassigned" data-pos="7"></div>
+                        <div class="facelet unassigned" data-pos="8"></div>
+                    </div>
+                    
+                    <!-- Down Face (Yellow center) -->
+                    <div class="face face-d" data-face="D">
+                        <div class="facelet unassigned" data-pos="0"></div>
+                        <div class="facelet unassigned" data-pos="1"></div>
+                        <div class="facelet unassigned" data-pos="2"></div>
+                        <div class="facelet unassigned" data-pos="3"></div>
+                        <div class="facelet center color-yellow" data-pos="4"></div>
+                        <div class="facelet unassigned" data-pos="5"></div>
+                        <div class="facelet unassigned" data-pos="6"></div>
+                        <div class="facelet unassigned" data-pos="7"></div>
+                        <div class="facelet unassigned" data-pos="8"></div>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-secondary" id="resetBtn">↺ Reset</button>
+                    <button class="btn btn-primary" id="nextBtn" disabled>Continue →</button>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Color Palette -->
+                <div class="panel">
+                    <h3>🎨 Color Palette</h3>
+                    <div class="color-palette">
+                        <button class="color-btn color-white active" data-color="white">W</button>
+                        <button class="color-btn color-yellow" data-color="yellow">Y</button>
+                        <button class="color-btn color-green" data-color="green">G</button>
+                        <button class="color-btn color-blue" data-color="blue">B</button>
+                        <button class="color-btn color-orange" data-color="orange">O</button>
+                        <button class="color-btn color-red" data-color="red">R</button>
+                    </div>
+                    <div class="shortcuts" style="margin-top: 15px;">
+                        <kbd>W</kbd> <kbd>Y</kbd> <kbd>G</kbd> <kbd>B</kbd> <kbd>O</kbd> <kbd>R</kbd> shortcuts
+                    </div>
+                </div>
+
+                <!-- Color Counter -->
+                <div class="panel">
+                    <h3>📊 Color Count</h3>
+                    <div class="color-counter">
+                        <div class="counter-row">
+                            <div class="counter-color color-white"></div>
+                            <div class="counter-bar"><div class="counter-fill partial" id="count-white" style="width: 11.1%"></div></div>
+                            <span class="counter-value" id="value-white">1/9</span>
+                        </div>
+                        <div class="counter-row">
+                            <div class="counter-color color-yellow"></div>
+                            <div class="counter-bar"><div class="counter-fill partial" id="count-yellow" style="width: 11.1%"></div></div>
+                            <span class="counter-value" id="value-yellow">1/9</span>
+                        </div>
+                        <div class="counter-row">
+                            <div class="counter-color color-green"></div>
+                            <div class="counter-bar"><div class="counter-fill partial" id="count-green" style="width: 11.1%"></div></div>
+                            <span class="counter-value" id="value-green">1/9</span>
+                        </div>
+                        <div class="counter-row">
+                            <div class="counter-color color-blue"></div>
+                            <div class="counter-bar"><div class="counter-fill partial" id="count-blue" style="width: 11.1%"></div></div>
+                            <span class="counter-value" id="value-blue">1/9</span>
+                        </div>
+                        <div class="counter-row">
+                            <div class="counter-color color-orange"></div>
+                            <div class="counter-bar"><div class="counter-fill partial" id="count-orange" style="width: 11.1%"></div></div>
+                            <span class="counter-value" id="value-orange">1/9</span>
+                        </div>
+                        <div class="counter-row">
+                            <div class="counter-color color-red"></div>
+                            <div class="counter-bar"><div class="counter-fill partial" id="count-red" style="width: 11.1%"></div></div>
+                            <span class="counter-value" id="value-red">1/9</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="panel">
+                    <h3>📝 Instructions</h3>
+                    <div class="instructions" id="instructions">
+                        <p><strong>Step 1:</strong> Configure the Top face (White center)</p>
+                        <p style="margin-top: 10px;">Click a facelet, then select a color from the palette. Each color must appear exactly 9 times.</p>
+                    </div>
+                    <div id="validation"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            selectedColor: 'white',
+            selectedFacelet: null,
+            currentFace: 'U',
+            faceOrder: ['U', 'F', 'R', 'B', 'L', 'D'],
+            currentFaceIndex: 0,
+            cubeState: {
+                U: [null, null, null, null, 'white', null, null, null, null],
+                D: [null, null, null, null, 'yellow', null, null, null, null],
+                F: [null, null, null, null, 'green', null, null, null, null],
+                B: [null, null, null, null, 'blue', null, null, null, null],
+                L: [null, null, null, null, 'orange', null, null, null, null],
+                R: [null, null, null, null, 'red', null, null, null, null]
+            },
+            colorCounts: {
+                white: 1,
+                yellow: 1,
+                green: 1,
+                blue: 1,
+                orange: 1,
+                red: 1
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            updateUI();
+        });
+
+        function setupEventListeners() {
+            // Color palette buttons
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.addEventListener('click', () => selectColor(btn.dataset.color));
+            });
+
+            // Facelets
+            document.querySelectorAll('.facelet').forEach(facelet => {
+                facelet.addEventListener('click', (e) => {
+                    if (!facelet.classList.contains('center')) {
+                        handleFaceletClick(facelet);
+                    }
+                });
+            });
+
+            // Face indicators
+            document.querySelectorAll('.face-indicator').forEach(indicator => {
+                indicator.addEventListener('click', () => {
+                    navigateToFace(indicator.dataset.face);
+                });
+            });
+
+            // Reset button
+            document.getElementById('resetBtn').addEventListener('click', resetConfiguration);
+
+            // Next button
+            document.getElementById('nextBtn').addEventListener('click', proceedToNext);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboard);
+        }
+
+        function selectColor(color) {
+            state.selectedColor = color;
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.color === color);
+            });
+        }
+
+        function handleFaceletClick(facelet) {
+            const face = facelet.closest('.face').dataset.face;
+            const pos = parseInt(facelet.dataset.pos);
+            
+            // Get current color at this position
+            const currentColor = state.cubeState[face][pos];
+            
+            // Update color count
+            if (currentColor) {
+                state.colorCounts[currentColor]--;
+            }
+            
+            // Assign new color
+            state.cubeState[face][pos] = state.selectedColor;
+            state.colorCounts[state.selectedColor]++;
+            
+            // Update UI
+            updateFacelet(facelet, state.selectedColor);
+            updateColorCounters();
+            updateProgress();
+            validateConfiguration();
+        }
+
+        function updateFacelet(facelet, color) {
+            facelet.className = 'facelet';
+            if (color) {
+                facelet.classList.add(`color-${color}`);
+            } else {
+                facelet.classList.add('unassigned');
+            }
+        }
+
+        function updateColorCounters() {
+            Object.keys(state.colorCounts).forEach(color => {
+                const count = state.colorCounts[color];
+                const percentage = (count / 9) * 100;
+                const fill = document.getElementById(`count-${color}`);
+                const value = document.getElementById(`value-${color}`);
+                
+                fill.style.width = `${percentage}%`;
+                value.textContent = `${count}/9`;
+                
+                fill.className = 'counter-fill';
+                if (count === 9) {
+                    fill.classList.add('valid');
+                } else if (count > 9) {
+                    fill.classList.add('invalid');
+                } else {
+                    fill.classList.add('partial');
+                }
+            });
+        }
+
+        function updateProgress() {
+            const totalFacelets = 54;
+            const centerFacelets = 6;
+            const configurableFacelets = totalFacelets - centerFacelets;
+            
+            let configured = 0;
+            Object.values(state.cubeState).forEach(face => {
+                face.forEach((color, index) => {
+                    if (index !== 4 && color !== null) {
+                        configured++;
+                    }
+                });
+            });
+            
+            const percentage = Math.round((configured / configurableFacelets) * 100);
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = `${percentage}% Complete`;
+            
+            // Update face indicators
+            state.faceOrder.forEach(face => {
+                const faceState = state.cubeState[face];
+                const isComplete = faceState.every((color, index) => index === 4 || color !== null);
+                const indicator = document.querySelector(`.face-indicator[data-face="${face}"]`);
+                
+                indicator.classList.remove('pending', 'active', 'completed');
+                if (face === state.currentFace) {
+                    indicator.classList.add('active');
+                } else if (isComplete) {
+                    indicator.classList.add('completed');
+                } else {
+                    indicator.classList.add('pending');
+                }
+            });
+        }
+
+        function validateConfiguration() {
+            const validation = document.getElementById('validation');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            const errors = [];
+            const warnings = [];
+            
+            // Check color counts
+            Object.entries(state.colorCounts).forEach(([color, count]) => {
+                if (count > 9) {
+                    errors.push(`${color.charAt(0).toUpperCase() + color.slice(1)} used ${count} times (max 9)`);
+                }
+            });
+            
+            // Check if all facelets are assigned
+            const totalAssigned = Object.values(state.colorCounts).reduce((a, b) => a + b, 0);
+            if (totalAssigned < 54) {
+                warnings.push(`${54 - totalAssigned} facelets remaining to configure`);
+            }
+            
+            // Check if all colors are used exactly 9 times
+            const allValid = Object.values(state.colorCounts).every(count => count === 9);
+            
+            if (errors.length > 0) {
+                validation.innerHTML = `<div class="validation error">⚠️ ${errors.join('<br>')}</div>`;
+                nextBtn.disabled = true;
+            } else if (allValid) {
+                validation.innerHTML = `<div class="validation success">✅ Configuration valid! Ready to calculate solution.</div>`;
+                nextBtn.disabled = false;
+            } else if (warnings.length > 0) {
+                validation.innerHTML = `<div class="validation warning">ℹ️ ${warnings.join('<br>')}</div>`;
+                nextBtn.disabled = true;
+            } else {
+                validation.innerHTML = '';
+                nextBtn.disabled = true;
+            }
+        }
+
+        function navigateToFace(face) {
+            state.currentFace = face;
+            state.currentFaceIndex = state.faceOrder.indexOf(face);
+            
+            // Update highlighted face
+            document.querySelectorAll('.face').forEach(f => {
+                f.classList.toggle('highlighted', f.dataset.face === face);
+            });
+            
+            // Update instructions
+            const faceNames = {
+                U: 'Top face (White center)',
+                F: 'Front face (Green center)',
+                R: 'Right face (Red center)',
+                B: 'Back face (Blue center)',
+                L: 'Left face (Orange center)',
+                D: 'Bottom face (Yellow center)'
+            };
+            
+            document.getElementById('instructions').innerHTML = `
+                <p><strong>Step ${state.currentFaceIndex + 1}:</strong> Configure the ${faceNames[face]}</p>
+                <p style="margin-top: 10px;">Click a facelet, then select a color from the palette.</p>
+            `;
+            
+            updateProgress();
+        }
+
+        function resetConfiguration() {
+            if (confirm('Are you sure you want to reset? All configuration will be lost.')) {
+                // Reset state
+                Object.keys(state.cubeState).forEach(face => {
+                    state.cubeState[face] = [null, null, null, null, null, null, null, null, null];
+                    // Set center colors
+                    const centerColors = { U: 'white', D: 'yellow', F: 'green', B: 'blue', L: 'orange', R: 'red' };
+                    state.cubeState[face][4] = centerColors[face];
+                });
+                
+                state.colorCounts = { white: 1, yellow: 1, green: 1, blue: 1, orange: 1, red: 1 };
+                state.currentFaceIndex = 0;
+                state.currentFace = 'U';
+                
+                // Reset UI
+                document.querySelectorAll('.facelet').forEach(facelet => {
+                    const face = facelet.closest('.face').dataset.face;
+                    const pos = parseInt(facelet.dataset.pos);
+                    const color = state.cubeState[face][pos];
+                    updateFacelet(facelet, color);
+                    if (pos === 4) facelet.classList.add('center');
+                });
+                
+                updateColorCounters();
+                updateProgress();
+                validateConfiguration();
+                navigateToFace('U');
+            }
+        }
+
+        function proceedToNext() {
+            alert('Configuration complete! Proceeding to solution calculation...\n\nThis would navigate to the Assembly Mechanism feature.');
+        }
+
+        function handleKeyboard(e) {
+            const colorKeys = {
+                'w': 'white',
+                'y': 'yellow',
+                'g': 'green',
+                'b': 'blue',
+                'o': 'orange',
+                'r': 'red'
+            };
+            
+            if (colorKeys[e.key.toLowerCase()]) {
+                selectColor(colorKeys[e.key.toLowerCase()]);
+            }
+        }
+
+        function updateUI() {
+            // Sync UI with state
+            document.querySelectorAll('.facelet').forEach(facelet => {
+                const face = facelet.closest('.face').dataset.face;
+                const pos = parseInt(facelet.dataset.pos);
+                const color = state.cubeState[face][pos];
+                updateFacelet(facelet, color);
+                if (pos === 4) facelet.classList.add('center');
+            });
+            
+            updateColorCounters();
+            updateProgress();
+            validateConfiguration();
+        }
+    </script>
+</body>
+</html>

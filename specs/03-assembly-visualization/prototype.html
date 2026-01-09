@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature 3: Assembly Visualization Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #a855f7, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #8892b0;
+            font-size: 0.95rem;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cube Viewport */
+        .cube-viewport {
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+
+        .viewport-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-display {
+            font-size: 1rem;
+            color: #8892b0;
+        }
+
+        .step-display strong {
+            color: #a855f7;
+            font-size: 1.3rem;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            border-radius: 8px;
+            color: #8892b0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .view-btn.active {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .view-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* 3D Cube Container */
+        .cube-3d-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 800px;
+            min-height: 300px;
+        }
+
+        .cube-3d {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-25deg) rotateY(-35deg);
+            transition: transform 0.6s ease;
+        }
+
+        .cube-3d.rotating {
+            animation: rotateFace 0.6s ease forwards;
+        }
+
+        @keyframes rotateFace {
+            0% { transform: rotateX(-25deg) rotateY(-35deg); }
+            50% { transform: rotateX(-25deg) rotateY(-35deg) scale(1.05); }
+            100% { transform: rotateX(-25deg) rotateY(-35deg); }
+        }
+
+        .face-3d {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            backface-visibility: hidden;
+        }
+
+        .face-3d.front { transform: translateZ(90px); }
+        .face-3d.back { transform: rotateY(180deg) translateZ(90px); }
+        .face-3d.right { transform: rotateY(90deg) translateZ(90px); }
+        .face-3d.left { transform: rotateY(-90deg) translateZ(90px); }
+        .face-3d.top { transform: rotateX(90deg) translateZ(90px); }
+        .face-3d.bottom { transform: rotateX(-90deg) translateZ(90px); }
+
+        .face-3d.active {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+        }
+
+        .facelet-3d {
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .facelet-3d.moving {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 2D Unfolded View */
+        .cube-2d-container {
+            display: none;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cube-2d-container.active {
+            display: flex;
+        }
+
+        .cube-3d-container.hidden {
+            display: none;
+        }
+
+        .cube-2d {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 4px;
+        }
+
+        .face-2d {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            padding: 3px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .face-2d.active {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            transform: scale(1.02);
+        }
+
+        .face-u { grid-column: 2; grid-row: 1; }
+        .face-l { grid-column: 1; grid-row: 2; }
+        .face-f { grid-column: 2; grid-row: 2; }
+        .face-r { grid-column: 3; grid-row: 2; }
+        .face-b { grid-column: 4; grid-row: 2; }
+        .face-d { grid-column: 2; grid-row: 3; }
+
+        .facelet-2d {
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .facelet-2d.moving {
+            animation: pulse 0.6s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Colors */
+        .color-white { background: #FFFFFF; }
+        .color-yellow { background: #FFD500; }
+        .color-green { background: #009B48; }
+        .color-blue { background: #0046AD; }
+        .color-orange { background: #FF5800; }
+        .color-red { background: #B71234; }
+
+        /* Move Info Panel */
+        .move-info {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .move-notation {
+            font-family: 'Courier New', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #a855f7;
+            margin-bottom: 10px;
+        }
+
+        .move-description {
+            color: #ccd6f6;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .move-details {
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+
+        .rotation-indicator {
+            font-size: 2rem;
+            margin-top: 10px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .panel h3 {
+            font-size: 0.95rem;
+            color: #ccd6f6;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Progress Panel */
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a855f7, #06b6d4);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            color: #8892b0;
+            font-size: 0.85rem;
+        }
+
+        /* Navigation Controls */
+        .nav-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.primary {
+            background: linear-gradient(90deg, #a855f7, #06b6d4);
+            color: #fff;
+        }
+
+        .nav-btn.primary:hover:not(:disabled) {
+            box-shadow: 0 5px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Playback Controls */
+        .playback-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .playback-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.05);
+            color: #8892b0;
+        }
+
+        .playback-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #ccd6f6;
+        }
+
+        .playback-btn.active {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        /* Speed Control */
+        .speed-control {
+            margin-top: 15px;
+        }
+
+        .speed-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #8892b0;
+        }
+
+        .speed-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .speed-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            background: rgba(255,255,255,0.05);
+            color: #8892b0;
+            transition: all 0.2s ease;
+        }
+
+        .speed-btn.active {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .speed-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Move Queue */
+        .move-queue {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .move-queue::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .move-queue::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
+
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .queue-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .queue-item.current {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .queue-item.completed {
+            opacity: 0.5;
+        }
+
+        .queue-num {
+            width: 24px;
+            height: 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #8892b0;
+        }
+
+        .queue-item.current .queue-num {
+            background: #a855f7;
+            color: #fff;
+        }
+
+        .queue-item.completed .queue-num {
+            background: rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+
+        .queue-notation {
+            font-family: monospace;
+            font-weight: 600;
+            color: #ccd6f6;
+            font-size: 1rem;
+        }
+
+        /* Completion Modal */
+        .completion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .completion-overlay.active {
+            display: flex;
+        }
+
+        .completion-modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 450px;
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .completion-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 0.6s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .completion-title {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #a855f7, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .completion-subtitle {
+            color: #8892b0;
+            font-size: 1rem;
+            margin-bottom: 25px;
+        }
+
+        .completion-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .completion-stat {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .completion-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #a855f7;
+        }
+
+        .completion-stat-label {
+            font-size: 0.8rem;
+            color: #8892b0;
+            margin-top: 5px;
+        }
+
+        .completion-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .completion-btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .completion-btn.primary {
+            background: linear-gradient(90deg, #a855f7, #06b6d4);
+            color: #fff;
+        }
+
+        .completion-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: #ccd6f6;
+        }
+
+        .completion-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts-panel {
+            font-size: 0.8rem;
+            color: #5a6a8a;
+        }
+
+        .shortcuts-panel kbd {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-right: 5px;
+        }
+
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Assembly Visualization</h1>
+            <p>Follow along step-by-step to solve your Rubik's cube</p>
+        </header>
+
+        <div class="main-layout">
+            <!-- Cube Viewport -->
+            <div class="cube-viewport">
+                <div class="viewport-header">
+                    <div class="step-display">
+                        Step <strong id="currentStep">1</strong> of <span id="totalSteps">23</span>
+                    </div>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="3d">3D View</button>
+                        <button class="view-btn" data-view="2d">2D View</button>
+                    </div>
+                </div>
+
+                <!-- 3D Cube -->
+                <div class="cube-3d-container" id="cube3dContainer">
+                    <div class="cube-3d" id="cube3d">
+                        <div class="face-3d front" id="face-F"></div>
+                        <div class="face-3d back" id="face-B"></div>
+                        <div class="face-3d right" id="face-R"></div>
+                        <div class="face-3d left" id="face-L"></div>
+                        <div class="face-3d top" id="face-U"></div>
+                        <div class="face-3d bottom" id="face-D"></div>
+                    </div>
+                </div>
+
+                <!-- 2D Cube -->
+                <div class="cube-2d-container" id="cube2dContainer">
+                    <div class="cube-2d">
+                        <div class="face-2d face-u" id="face2d-U" data-face="U"></div>
+                        <div class="face-2d face-l" id="face2d-L" data-face="L"></div>
+                        <div class="face-2d face-f" id="face2d-F" data-face="F"></div>
+                        <div class="face-2d face-r" id="face2d-R" data-face="R"></div>
+                        <div class="face-2d face-b" id="face2d-B" data-face="B"></div>
+                        <div class="face-2d face-d" id="face2d-D" data-face="D"></div>
+                    </div>
+                </div>
+
+                <!-- Move Info -->
+                <div class="move-info">
+                    <div class="move-notation" id="moveNotation">R</div>
+                    <div class="move-description" id="moveDescription">Right face clockwise</div>
+                    <div class="move-details" id="moveDetails">90° rotation</div>
+                    <div class="rotation-indicator" id="rotationIndicator">↻</div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Progress Panel -->
+                <div class="panel">
+                    <h3>📊 Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 4.3%"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="progressPercent">4%</span>
+                        <span id="movesRemaining">22 moves left</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="panel">
+                    <h3>🎮 Controls</h3>
+                    <div class="nav-controls">
+                        <button class="nav-btn" id="prevBtn" title="Previous step">⏮</button>
+                        <button class="nav-btn primary" id="nextBtn" title="Next step">▶</button>
+                        <button class="nav-btn" id="skipBtn" title="Skip to next">⏭</button>
+                    </div>
+                    <div class="playback-controls">
+                        <button class="playback-btn" id="resetBtn" title="Reset to start">⏪ Reset</button>
+                        <button class="playback-btn" id="playBtn" title="Auto play">▶ Play</button>
+                    </div>
+                    <div class="speed-control">
+                        <div class="speed-label">
+                            <span>Animation Speed</span>
+                            <span id="speedValue">Normal</span>
+                        </div>
+                        <div class="speed-buttons">
+                            <button class="speed-btn" data-speed="slow">🐢 Slow</button>
+                            <button class="speed-btn active" data-speed="normal">Normal</button>
+                            <button class="speed-btn" data-speed="fast">🐇 Fast</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Move Queue -->
+                <div class="panel">
+                    <h3>📝 Move Sequence</h3>
+                    <div class="move-queue" id="moveQueue">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Keyboard Shortcuts -->
+                <div class="panel shortcuts-panel">
+                    <h3>⌨️ Shortcuts</h3>
+                    <div class="shortcut-row">
+                        <span><kbd>→</kbd> <kbd>Space</kbd></span>
+                        <span>Next step</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span><kbd>←</kbd></span>
+                        <span>Previous step</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span><kbd>P</kbd></span>
+                        <span>Play/Pause</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span><kbd>R</kbd></span>
+                        <span>Reset</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <div class="completion-overlay" id="completionOverlay">
+        <div class="completion-modal">
+            <div class="completion-icon">🎉</div>
+            <h2 class="completion-title">Congratulations!</h2>
+            <p class="completion-subtitle">You've successfully solved the Rubik's Cube!</p>
+            <div class="completion-stats">
+                <div class="completion-stat">
+                    <div class="completion-stat-value" id="statMoves">23</div>
+                    <div class="completion-stat-label">Total Moves</div>
+                </div>
+                <div class="completion-stat">
+                    <div class="completion-stat-value" id="statTime">2:45</div>
+                    <div class="completion-stat-label">Time Taken</div>
+                </div>
+            </div>
+            <div class="completion-actions">
+                <button class="completion-btn secondary" id="reviewBtn">📖 Review Solution</button>
+                <button class="completion-btn primary" id="newCubeBtn">🔄 New Cube</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            currentStep: 0,
+            isPlaying: false,
+            animationSpeed: 'normal',
+            view: '3d',
+            playInterval: null,
+            startTime: null
+        };
+
+        const speeds = {
+            slow: { duration: 1500, delay: 3000 },
+            normal: { duration: 750, delay: 1500 },
+            fast: { duration: 300, delay: 600 }
+        };
+
+        // Sample moves
+        const moves = [
+            { notation: "R", face: "R", direction: "clockwise", degrees: 90, description: "Right face clockwise" },
+            { notation: "U", face: "U", direction: "clockwise", degrees: 90, description: "Top face clockwise" },
+            { notation: "R'", face: "R", direction: "counter-clockwise", degrees: 90, description: "Right face counter-clockwise" },
+            { notation: "U'", face: "U", direction: "counter-clockwise", degrees: 90, description: "Top face counter-clockwise" },
+            { notation: "R", face: "R", direction: "clockwise", degrees: 90, description: "Right face clockwise" },
+            { notation: "U", face: "U", direction: "clockwise", degrees: 90, description: "Top face clockwise" },
+            { notation: "R'", face: "R", direction: "counter-clockwise", degrees: 90, description: "Right face counter-clockwise" },
+            { notation: "F2", face: "F", direction: "double", degrees: 180, description: "Front face 180°" },
+            { notation: "L", face: "L", direction: "clockwise", degrees: 90, description: "Left face clockwise" },
+            { notation: "D'", face: "D", direction: "counter-clockwise", degrees: 90, description: "Bottom face counter-clockwise" },
+            { notation: "B", face: "B", direction: "clockwise", degrees: 90, description: "Back face clockwise" },
+            { notation: "U2", face: "U", direction: "double", degrees: 180, description: "Top face 180°" },
+            { notation: "R'", face: "R", direction: "counter-clockwise", degrees: 90, description: "Right face counter-clockwise" },
+            { notation: "D", face: "D", direction: "clockwise", degrees: 90, description: "Bottom face clockwise" },
+            { notation: "L'", face: "L", direction: "counter-clockwise", degrees: 90, description: "Left face counter-clockwise" },
+            { notation: "U", face: "U", direction: "clockwise", degrees: 90, description: "Top face clockwise" },
+            { notation: "F", face: "F", direction: "clockwise", degrees: 90, description: "Front face clockwise" },
+            { notation: "B'", face: "B", direction: "counter-clockwise", degrees: 90, description: "Back face counter-clockwise" },
+            { notation: "R2", face: "R", direction: "double", degrees: 180, description: "Right face 180°" },
+            { notation: "U'", face: "U", direction: "counter-clockwise", degrees: 90, description: "Top face counter-clockwise" },
+            { notation: "L", face: "L", direction: "clockwise", degrees: 90, description: "Left face clockwise" },
+            { notation: "D2", face: "D", direction: "double", degrees: 180, description: "Bottom face 180°" },
+            { notation: "F'", face: "F", direction: "counter-clockwise", degrees: 90, description: "Front face counter-clockwise" }
+        ];
+
+        // Cube state (simplified - colors per face)
+        const cubeColors = {
+            U: ['orange', 'blue', 'red', 'yellow', 'white', 'green', 'white', 'orange', 'blue'],
+            D: ['red', 'green', 'yellow', 'blue', 'yellow', 'red', 'orange', 'white', 'green'],
+            F: ['yellow', 'red', 'white', 'orange', 'green', 'blue', 'yellow', 'yellow', 'orange'],
+            B: ['green', 'white', 'orange', 'green', 'blue', 'yellow', 'red', 'orange', 'blue'],
+            L: ['white', 'blue', 'green', 'white', 'orange', 'red', 'blue', 'green', 'white'],
+            R: ['blue', 'orange', 'yellow', 'red', 'red', 'white', 'green', 'yellow', 'red']
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            state.startTime = Date.now();
+            renderCubes();
+            renderMoveQueue();
+            updateUI();
+            setupEventListeners();
+        });
+
+        function renderCubes() {
+            // Render 3D cube faces
+            ['U', 'D', 'F', 'B', 'L', 'R'].forEach(face => {
+                const faceEl = document.getElementById(`face-${face}`);
+                faceEl.innerHTML = '';
+                cubeColors[face].forEach((color, i) => {
+                    const facelet = document.createElement('div');
+                    facelet.className = `facelet-3d color-${color}`;
+                    facelet.dataset.index = i;
+                    faceEl.appendChild(facelet);
+                });
+            });
+
+            // Render 2D cube faces
+            ['U', 'D', 'F', 'B', 'L', 'R'].forEach(face => {
+                const faceEl = document.getElementById(`face2d-${face}`);
+                faceEl.innerHTML = '';
+                cubeColors[face].forEach((color, i) => {
+                    const facelet = document.createElement('div');
+                    facelet.className = `facelet-2d color-${color}`;
+                    facelet.dataset.index = i;
+                    faceEl.appendChild(facelet);
+                });
+            });
+        }
+
+        function renderMoveQueue() {
+            const queue = document.getElementById('moveQueue');
+            queue.innerHTML = '';
+            
+            moves.forEach((move, index) => {
+                const item = document.createElement('div');
+                item.className = 'queue-item';
+                if (index === state.currentStep) item.classList.add('current');
+                if (index < state.currentStep) item.classList.add('completed');
+                
+                item.innerHTML = `
+                    <div class="queue-num">${index < state.currentStep ? '✓' : index + 1}</div>
+                    <div class="queue-notation">${move.notation}</div>
+                `;
+                
+                item.addEventListener('click', () => goToStep(index));
+                queue.appendChild(item);
+            });
+
+            // Scroll current into view
+            const currentItem = queue.querySelector('.current');
+            if (currentItem) {
+                currentItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function setupEventListeners() {
+            // Navigation
+            document.getElementById('prevBtn').addEventListener('click', previousStep);
+            document.getElementById('nextBtn').addEventListener('click', nextStep);
+            document.getElementById('skipBtn').addEventListener('click', () => nextStep(true));
+            document.getElementById('resetBtn').addEventListener('click', resetVisualization);
+            document.getElementById('playBtn').addEventListener('click', togglePlay);
+
+            // View toggle
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchView(btn.dataset.view));
+            });
+
+            // Speed buttons
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.addEventListener('click', () => setSpeed(btn.dataset.speed));
+            });
+
+            // Completion modal
+            document.getElementById('reviewBtn').addEventListener('click', () => {
+                document.getElementById('completionOverlay').classList.remove('active');
+                goToStep(0);
+            });
+            document.getElementById('newCubeBtn').addEventListener('click', () => {
+                alert('Returning to Configuration...\n\nThis would navigate back to the Cube Configuration feature.');
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboard);
+        }
+
+        function handleKeyboard(e) {
+            switch(e.key) {
+                case 'ArrowRight':
+                case ' ':
+                    e.preventDefault();
+                    nextStep();
+                    break;
+                case 'ArrowLeft':
+                    previousStep();
+                    break;
+                case 'p':
+                case 'P':
+                    togglePlay();
+                    break;
+                case 'r':
+                case 'R':
+                    resetVisualization();
+                    break;
+            }
+        }
+
+        function updateUI() {
+            const move = moves[state.currentStep];
+            const totalMoves = moves.length;
+            
+            // Update step display
+            document.getElementById('currentStep').textContent = state.currentStep + 1;
+            document.getElementById('totalSteps').textContent = totalMoves;
+            
+            // Update progress
+            const progress = ((state.currentStep + 1) / totalMoves) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressPercent').textContent = `${Math.round(progress)}%`;
+            document.getElementById('movesRemaining').textContent = `${totalMoves - state.currentStep - 1} moves left`;
+            
+            // Update move info
+            document.getElementById('moveNotation').textContent = move.notation;
+            document.getElementById('moveDescription').textContent = move.description;
+            document.getElementById('moveDetails').textContent = `${move.degrees}° rotation`;
+            
+            const rotationSymbol = move.direction === 'clockwise' ? '↻' : 
+                                   move.direction === 'counter-clockwise' ? '↺' : '↔';
+            document.getElementById('rotationIndicator').textContent = rotationSymbol;
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = state.currentStep === 0;
+            document.getElementById('nextBtn').disabled = state.currentStep >= totalMoves - 1;
+            document.getElementById('skipBtn').disabled = state.currentStep >= totalMoves - 1;
+            
+            // Highlight active face
+            highlightActiveFace(move.face);
+            
+            // Update move queue
+            renderMoveQueue();
+        }
+
+        function highlightActiveFace(face) {
+            // 3D faces
+            document.querySelectorAll('.face-3d').forEach(f => f.classList.remove('active'));
+            document.getElementById(`face-${face}`).classList.add('active');
+            
+            // 2D faces
+            document.querySelectorAll('.face-2d').forEach(f => f.classList.remove('active'));
+            document.getElementById(`face2d-${face}`).classList.add('active');
+        }
+
+        function animateMove(callback) {
+            const cube3d = document.getElementById('cube3d');
+            cube3d.classList.add('rotating');
+            
+            const duration = speeds[state.animationSpeed].duration;
+            
+            setTimeout(() => {
+                cube3d.classList.remove('rotating');
+                // Simulate color changes (in real app, would update actual cube state)
+                shuffleColors();
+                renderCubes();
+                if (callback) callback();
+            }, duration);
+        }
+
+        function shuffleColors() {
+            // Simple shuffle to simulate move (in real app, would be actual rotation logic)
+            const move = moves[state.currentStep];
+            const face = move.face;
+            
+            // Rotate the face colors
+            const colors = [...cubeColors[face]];
+            if (move.direction === 'clockwise') {
+                cubeColors[face] = [colors[6], colors[3], colors[0], colors[7], colors[4], colors[1], colors[8], colors[5], colors[2]];
+            } else if (move.direction === 'counter-clockwise') {
+                cubeColors[face] = [colors[2], colors[5], colors[8], colors[1], colors[4], colors[7], colors[0], colors[3], colors[6]];
+            } else {
+                // 180 degree
+                cubeColors[face] = [colors[8], colors[7], colors[6], colors[5], colors[4], colors[3], colors[2], colors[1], colors[0]];
+            }
+        }
+
+        function nextStep(skip = false) {
+            if (state.currentStep >= moves.length - 1) {
+                showCompletion();
+                return;
+            }
+            
+            if (skip) {
+                state.currentStep++;
+                updateUI();
+            } else {
+                animateMove(() => {
+                    state.currentStep++;
+                    updateUI();
+                    
+                    if (state.currentStep >= moves.length - 1) {
+                        showCompletion();
+                    }
+                });
+            }
+        }
+
+        function previousStep() {
+            if (state.currentStep <= 0) return;
+            state.currentStep--;
+            // Reverse shuffle (simplified - in real app would track actual states)
+            shuffleColors();
+            renderCubes();
+            updateUI();
+        }
+
+        function goToStep(step) {
+            state.currentStep = step;
+            updateUI();
+        }
+
+        function resetVisualization() {
+            stopPlay();
+            state.currentStep = 0;
+            state.startTime = Date.now();
+            // Reset cube colors to initial scrambled state
+            // (In real app, would restore from saved initial state)
+            updateUI();
+        }
+
+        function togglePlay() {
+            if (state.isPlaying) {
+                stopPlay();
+            } else {
+                startPlay();
+            }
+        }
+
+        function startPlay() {
+            state.isPlaying = true;
+            document.getElementById('playBtn').textContent = '⏸ Pause';
+            document.getElementById('playBtn').classList.add('active');
+            
+            playNextMove();
+        }
+
+        function playNextMove() {
+            if (!state.isPlaying || state.currentStep >= moves.length - 1) {
+                stopPlay();
+                if (state.currentStep >= moves.length - 1) {
+                    showCompletion();
+                }
+                return;
+            }
+            
+            nextStep();
+            state.playInterval = setTimeout(playNextMove, speeds[state.animationSpeed].delay);
+        }
+
+        function stopPlay() {
+            state.isPlaying = false;
+            document.getElementById('playBtn').textContent = '▶ Play';
+            document.getElementById('playBtn').classList.remove('active');
+            
+            if (state.playInterval) {
+                clearTimeout(state.playInterval);
+                state.playInterval = null;
+            }
+        }
+
+        function setSpeed(speed) {
+            state.animationSpeed = speed;
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.speed === speed);
+            });
+            
+            const labels = { slow: 'Slow', normal: 'Normal', fast: 'Fast' };
+            document.getElementById('speedValue').textContent = labels[speed];
+        }
+
+        function switchView(view) {
+            state.view = view;
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+            
+            const container3d = document.getElementById('cube3dContainer');
+            const container2d = document.getElementById('cube2dContainer');
+            
+            if (view === '3d') {
+                container3d.classList.remove('hidden');
+                container2d.classList.remove('active');
+            } else {
+                container3d.classList.add('hidden');
+                container2d.classList.add('active');
+            }
+        }
+
+        function showCompletion() {
+            stopPlay();
+            
+            // Calculate time
+            const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('statTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('statMoves').textContent = moves.length;
+            
+            // Show modal
+            document.getElementById('completionOverlay').classList.add('active');
+            
+            // Confetti
+            createConfetti();
+        }
+
+        function createConfetti() {
+            const colors = ['#a855f7', '#06b6d4', '#feca57', '#00ff88', '#ff6b6b'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 50);
+            }
+        }
+    </script>
+</body>
+</html>
