@@ -3,6 +3,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   root: './src',
+  base: '/rubiks-cube-app/', // GitHub Pages base path
   build: {
     outDir: '../dist',
     emptyOutDir: true,
@@ -10,12 +11,6 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
-    },
   },
   resolve: {
     alias: {

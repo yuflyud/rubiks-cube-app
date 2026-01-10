@@ -245,8 +245,9 @@ Web-based application helping users solve Rubik's cubes through:
 
 | Property | Value |
 |----------|-------|
-| Status | Accepted |
+| Status | Implemented |
 | Date | January 10, 2026 |
+| Implementation Date | January 10, 2026 |
 | Drivers | TC-001, TC-003, BD-1 |
 | Risks | R-005 |
 
@@ -259,10 +260,18 @@ Web-based application helping users solve Rubik's cubes through:
 | GitHub Pages | Free | ✓ | ✓ | ✓ | Selected |
 | Vercel | Free tier | ✓ | ✓ | ✓ | Rejected (external dep) |
 | AWS S3 | $5-10/mo | ✓ | ✓ | Manual | Rejected (cost) |
+| Railway | Free tier | ✓ | ✓ | ✓ | Rejected (requires backend) |
+
+**Implementation Details:**
+- Deployment via GitHub Actions workflow (`.github/workflows/build-deploy.yml`)
+- Automatic deployment on push to main branch
+- Build artifacts uploaded to GitHub Pages
+- Base URL: `/rubiks-cube-app/` configured in Vite
 
 **Consequences:**
 - ✓ Zero cost (BD-1)
 - ✓ Automatic HTTPS and CDN
+- ✓ Integrated CI/CD pipeline
 - ✗ Tied to GitHub ecosystem (R-005)
 - ✗ Static content only (acceptable per ADR-001)
 
