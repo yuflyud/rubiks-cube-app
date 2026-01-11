@@ -1,8 +1,13 @@
 import './styles/main.css';
 import { CubeConfigurationContainer } from './features/configuration';
 import type { CubeState, ValidationResult } from './features/configuration';
+import { SolutionCalculator } from './features/assembly';
+import type { Solution } from './features/assembly';
 
 console.log('🎲 Rubik\'s Cube App initialized');
+
+// Initialize solution calculator
+const solutionCalculator = new SolutionCalculator();
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -103,22 +108,65 @@ function createHeader(): HTMLElement {
 /**
  * Handles configuration completion
  */
-function handleConfigurationComplete(
+async function handleConfigurationComplete(
   state: CubeState,
   validationResult: ValidationResult
-): void {
+): Promise<void> {
   console.log('✓ Configuration completed!');
   console.log('Cube state:', state);
   console.log('Validation result:', validationResult);
 
   // Show elegant success notification
   showNotification(
-    'Configuration complete! Ready to calculate solution.',
-    'success'
+    'Configuration complete! Calculating solution...',
+    'info'
   );
 
-  // In future: Pass to Feature 2 (Assembly Mechanism)
-  // assembleMechanism.calculateSolution(state);
+  try {
+    // Calculate solution using Feature 2 (Assembly Mechanism)
+    console.log('⚙️ Calculating solution...');
+    const solution = await solutionCalculator.calculateSolution(state);
+
+    console.log('✓ Solution calculated!');
+    console.log('Solution:', solution);
+    console.log(`Total moves: ${solution.totalMoves}`);
+    console.log(`Algorithm: ${solution.algorithmUsed}`);
+    console.log(`Calculation time: ${solution.calculationTimeMs.toFixed(2)}ms`);
+    console.log(`Complexity: ${solution.metadata.complexity}`);
+
+    // Show success notification with solution details
+    if (solution.totalMoves === 0) {
+      showNotification(
+        'Cube is already solved! No moves needed.',
+        'success'
+      );
+    } else {
+      showNotification(
+        `Solution found! ${solution.totalMoves} moves required.`,
+        'success'
+      );
+    }
+
+    // Display solution moves in console
+    if (solution.increments.length > 0) {
+      console.log('Move sequence:');
+      solution.increments.forEach((inc) => {
+        console.log(`  ${inc.stepNumber}. ${inc.notation} - ${inc.description}`);
+      });
+    }
+
+    // In future: Pass to Feature 3 (Visualization)
+    // visualizationFeature.displaySolution(solution);
+  } catch (error) {
+    console.error('✗ Solution calculation failed:', error);
+
+    let errorMessage = 'Failed to calculate solution.';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    showNotification(errorMessage, 'error');
+  }
 }
 
 /**

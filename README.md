@@ -18,13 +18,22 @@ rubiks-cube-app/
 ├── src/
 │   ├── client/                    # Frontend application
 │   │   ├── features/              # Feature modules
-│   │   │   └── configuration/     # ✅ Feature 1: Cube Configuration
-│   │   │       ├── components/    # UI components
-│   │   │       ├── logic/         # Business logic
+│   │   │   ├── configuration/     # ✅ Feature 1: Cube Configuration
+│   │   │   │   ├── components/    # UI components
+│   │   │   │   ├── logic/         # Business logic
+│   │   │   │   ├── types/         # TypeScript types
+│   │   │   │   ├── styles/        # Feature styles
+│   │   │   │   ├── docs/          # Feature documentation
+│   │   │   │   ├── constants.ts   # Constants
+│   │   │   │   ├── index.ts       # Public API
+│   │   │   │   └── README.md      # Feature README
+│   │   │   └── assembly/          # ✅ Feature 2: Assembly Mechanism
+│   │   │       ├── logic/         # Solving logic
+│   │   │       ├── utils/         # Move execution
 │   │   │       ├── types/         # TypeScript types
 │   │   │       ├── styles/        # Feature styles
 │   │   │       ├── docs/          # Feature documentation
-│   │   │       ├── constants.ts   # Constants
+│   │   │       ├── constants.ts   # Move constants
 │   │   │       ├── index.ts       # Public API
 │   │   │       └── README.md      # Feature README
 │   │   ├── styles/                # Global styles
@@ -100,8 +109,23 @@ An elegant interface for configuring the current state of a 3x3 Rubik's Cube.
 
 **Documentation**: [src/client/features/configuration/README.md](src/client/features/configuration/README.md)
 
-### 🔜 Feature 2: Assembly Mechanism (Planned)
-Calculate optimal solution using solving algorithms.
+### ✅ Feature 2: Assembly Mechanism
+**Status**: Functional and Integrated
+
+A computational engine that calculates solving sequences for configured cube states.
+
+**Key Features:**
+- Solution calculation from validated cube states
+- Support for all 18 standard moves (U, U', U2, D, D', etc.)
+- Step-by-step move sequences with descriptions
+- Intermediate state tracking after each move
+- Configurable timeout and move limits
+- Error handling with detailed messages
+- Solution verification and metadata
+
+**Documentation**: [src/client/features/assembly/README.md](src/client/features/assembly/README.md)
+
+**Note**: Currently uses a simplified solving algorithm. For production, replace with Kociemba's algorithm for optimal solutions.
 
 ### 🔜 Feature 3: Assembly Visualization (Planned)
 3D visualization of solution steps with animations.
@@ -190,10 +214,16 @@ This project follows a **modular, feature-based architecture**:
 - [x] Guided flow
 - [x] Elegant styling with Tailwind
 
-### Phase 2: Solver (Next)
-- [ ] Kociemba algorithm integration
-- [ ] Solution calculation
-- [ ] Move notation display
+### Phase 2: Assembly Mechanism ✅
+- [x] Solution calculation engine
+- [x] Move executor for all 18 moves
+- [x] State simulator and verification
+- [x] Solution builder with increments
+- [x] Integration with Feature 1
+- [x] Error handling and validation
+- [ ] Kociemba algorithm (production enhancement)
+- [ ] Web Worker implementation
+- [ ] Solution caching
 
 ### Phase 3: Visualization (Future)
 - [ ] 3D WebGL cube
