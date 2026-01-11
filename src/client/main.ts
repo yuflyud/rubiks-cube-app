@@ -3,6 +3,7 @@ import { CubeConfigurationContainer } from './features/configuration';
 import type { CubeState, ValidationResult } from './features/configuration';
 import { SolutionCalculator } from './features/assembly';
 import type { Solution } from './features/assembly';
+import { VisualizationController } from './features/visualization';
 
 console.log('🎲 Rubik\'s Cube App initialized');
 
@@ -155,8 +156,8 @@ async function handleConfigurationComplete(
       });
     }
 
-    // In future: Pass to Feature 3 (Visualization)
-    // visualizationFeature.displaySolution(solution);
+    // Show visualization (Feature 3)
+    displayVisualization(solution);
   } catch (error) {
     console.error('✗ Solution calculation failed:', error);
 
@@ -167,6 +168,46 @@ async function handleConfigurationComplete(
 
     showNotification(errorMessage, 'error');
   }
+}
+
+/**
+ * Displays the visualization interface with the solution
+ */
+function displayVisualization(solution: Solution): void {
+  // Get the main container
+  const appContainer = document.getElementById('app');
+  if (!appContainer) {
+    console.error('App container not found');
+    return;
+  }
+
+  // Clear the entire app (remove configuration UI and header)
+  appContainer.innerHTML = '';
+
+  // Create visualization container
+  const visualizationContainer = document.createElement('div');
+  visualizationContainer.className = 'min-h-screen py-8 px-4';
+  appContainer.appendChild(visualizationContainer);
+
+  // Initialize visualization controller
+  const visualizationController = new VisualizationController(
+    visualizationContainer,
+    solution,
+    {
+      onRestart: () => {
+        // Restart visualization from beginning
+        visualizationController.destroy();
+        displayVisualization(solution);
+      },
+      onNewCube: () => {
+        // Go back to configuration
+        visualizationController.destroy();
+        location.reload(); // Simple approach: reload the page to restart
+      }
+    }
+  );
+
+  console.log('✓ Visualization initialized');
 }
 
 /**
