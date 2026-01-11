@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  body {
+    @apply antialiased;
+    @apply bg-gradient-to-br from-slate-50 via-white to-slate-100;
+    @apply text-slate-900;
+    @apply min-h-screen;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-white/60 backdrop-blur-xl border border-white/20;
+    @apply shadow-elegant-lg;
+  }
+
+  .glass-dark {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10;
+  }
+
+  /* Elegant card */
+  .card-elegant {
+    @apply bg-white rounded-2xl shadow-elegant-lg;
+    @apply transition-all duration-300;
+    @apply hover:shadow-elegant-xl;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl;
+    @apply bg-gradient-to-r from-blue-500 to-blue-600;
+    @apply text-white font-medium;
+    @apply shadow-elegant hover:shadow-elegant-lg;
+    @apply transition-all duration-200;
+    @apply hover:scale-[1.02] active:scale-[0.98];
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-xl;
+    @apply bg-white border-2 border-slate-200;
+    @apply text-slate-700 font-medium;
+    @apply shadow-elegant hover:shadow-elegant-lg;
+    @apply transition-all duration-200;
+    @apply hover:scale-[1.02] active:scale-[0.98];
+    @apply hover:border-slate-300;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-success {
+    @apply px-6 py-3 rounded-xl;
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600;
+    @apply text-white font-medium;
+    @apply shadow-elegant hover:shadow-elegant-lg;
+    @apply transition-all duration-200;
+    @apply hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply px-6 py-3 rounded-xl;
+    @apply bg-gradient-to-r from-rose-500 to-rose-600;
+    @apply text-white font-medium;
+    @apply shadow-elegant hover:shadow-elegant-lg;
+    @apply transition-all duration-200;
+    @apply hover:scale-[1.02] active:scale-[0.98];
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 to-violet-600;
+  }
+
+  .text-gradient-emerald {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-emerald-600 to-teal-600;
+  }
+}
+
+/* Elegant animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full;
+  @apply hover:bg-slate-400;
+}
+
+/* Selection */
+::selection {
+  @apply bg-blue-100 text-blue-900;
+}
+
+/* Focus visible */
+*:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2 rounded;
+}
