@@ -153,3 +153,81 @@ export const ANIMATION = {
   ERROR_HIGHLIGHT: 400,
   PROGRESS_UPDATE: 500
 } as const;
+
+/**
+ * User-friendly face names and descriptions for beginners
+ */
+export const FACE_NAMES: Record<Face, { name: string; color: Color; description: string }> = {
+  [Face.UP]: {
+    name: 'Top (White)',
+    color: Color.WHITE,
+    description: 'The top face of your cube (usually white)'
+  },
+  [Face.DOWN]: {
+    name: 'Bottom (Yellow)',
+    color: Color.YELLOW,
+    description: 'The bottom face of your cube (usually yellow, opposite of white)'
+  },
+  [Face.FRONT]: {
+    name: 'Front (Green)',
+    color: Color.GREEN,
+    description: 'The face facing you (usually green)'
+  },
+  [Face.BACK]: {
+    name: 'Back (Blue)',
+    color: Color.BLUE,
+    description: 'The face away from you (usually blue, opposite of green)'
+  },
+  [Face.LEFT]: {
+    name: 'Left (Orange)',
+    color: Color.ORANGE,
+    description: 'The face on your left side (usually orange)'
+  },
+  [Face.RIGHT]: {
+    name: 'Right (Red)',
+    color: Color.RED,
+    description: 'The face on your right side (usually red, opposite of orange)'
+  }
+};
+
+/**
+ * Color names for display
+ */
+export const COLOR_NAMES: Record<Color, string> = {
+  [Color.WHITE]: 'White',
+  [Color.YELLOW]: 'Yellow',
+  [Color.GREEN]: 'Green',
+  [Color.BLUE]: 'Blue',
+  [Color.ORANGE]: 'Orange',
+  [Color.RED]: 'Red'
+};
+
+/**
+ * Beginner-friendly instructions for cube orientation
+ */
+export const CUBE_ORIENTATION_GUIDE = {
+  title: 'How to Hold Your Cube',
+  steps: [
+    {
+      step: 1,
+      instruction: 'Hold your cube with WHITE on top and GREEN facing you',
+      emoji: '⬜'
+    },
+    {
+      step: 2,
+      instruction: 'Make sure YELLOW is on the bottom (opposite of white)',
+      emoji: '🟨'
+    },
+    {
+      step: 3,
+      instruction: 'GREEN should be in front, BLUE in back',
+      emoji: '🟩'
+    },
+    {
+      step: 4,
+      instruction: 'ORANGE on left, RED on right',
+      emoji: '🟧'
+    }
+  ],
+  tip: '💡 Tip: If your cube has different colors in these positions, just remember which color is where!'
+};

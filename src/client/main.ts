@@ -192,8 +192,8 @@ function displayVisualization(solution: Solution): void {
   // Initialize visualization controller
   const visualizationController = new VisualizationController(
     visualizationContainer,
-    solution,
     {
+      solution,
       onRestart: () => {
         // Restart visualization from beginning
         visualizationController.destroy();

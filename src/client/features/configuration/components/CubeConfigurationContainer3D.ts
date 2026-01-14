@@ -9,25 +9,28 @@ import {
 import { ConfigurationStateManager } from '../logic/ConfigurationStateManager';
 import { GuidedFlowManager } from '../logic/GuidedFlowManager';
 import { CubeValidator } from '../logic/CubeValidator';
+import { Cube3D } from './Cube3D';
 import { CubeDisplay } from './CubeDisplay';
 import { ColorPalette } from './ColorPalette';
 import { ProgressIndicator } from './ProgressIndicator';
 import { NavigationControls } from './NavigationControls';
 import { ValidationDisplay } from './ValidationDisplay';
 import { OrientationGuide } from './OrientationGuide';
+import { CubeViewToggle } from './CubeViewToggle';
 import { KEYBOARD_SHORTCUTS } from '../constants';
 
 export interface CubeConfigurationOptions {
   guidedMode?: boolean;
   showKeyboardShortcuts?: boolean;
   autoValidate?: boolean;
+  use3D?: boolean; // New option to enable 3D view
   onComplete?: (state: CubeState, validationResult: ValidationResult) => void;
 }
 
 /**
- * Main container orchestrating the configuration feature
+ * Main container orchestrating the configuration feature with 3D support
  */
-export class CubeConfigurationContainer {
+export class CubeConfigurationContainer3D {
   private element: HTMLElement;
   private options: CubeConfigurationOptions;
 
@@ -38,6 +41,9 @@ export class CubeConfigurationContainer {
 
   // UI components
   private cubeDisplay?: CubeDisplay;
+  private cube3D?: Cube3D;
+  private viewToggle?: CubeViewToggle;
+  private currentView: '2d' | '3d';
   private colorPalette?: ColorPalette;
   private progressIndicator?: ProgressIndicator;
   private navigationControls?: NavigationControls;
@@ -56,8 +62,11 @@ export class CubeConfigurationContainer {
       guidedMode: true,
       showKeyboardShortcuts: true,
       autoValidate: false,
+      use3D: true, // Default to 3D for better UX
       ...options
     };
+
+    this.currentView = this.options.use3D ? '3d' : '2d';
 
     // Initialize logic components
     this.stateManager = new ConfigurationStateManager();
@@ -97,9 +106,16 @@ export class CubeConfigurationContainer {
 
     this.element.appendChild(header);
 
-    // Orientation Guide (beginner-friendly with 3D cube)
+    // Orientation Guide (beginner-friendly)
     this.orientationGuide = new OrientationGuide();
     this.element.appendChild(this.orientationGuide.getElement());
+
+    // View Toggle (2D/3D)
+    this.viewToggle = new CubeViewToggle({
+      initialView: this.currentView,
+      onToggle: this.handleViewToggle.bind(this)
+    });
+    this.element.appendChild(this.viewToggle.getElement());
 
     // Instructions
     if (this.options.guidedMode) {
@@ -109,43 +125,25 @@ export class CubeConfigurationContainer {
       this.element.appendChild(instructions);
     }
 
-    // Main content area (2-column layout)
+    // Main content area
     const content = document.createElement('div');
     content.className = 'cube-configuration__content';
 
-    // Left column: Cube display
-    const cubeColumn = document.createElement('div');
-    cubeColumn.className = 'cube-configuration__cube-column';
+    // Render cube based on current view
+    this.renderCubeView(content);
 
-    this.cubeDisplay = new CubeDisplay({
-      cubeState: this.stateManager.getCubeState(),
-      currentFace: this.options.guidedMode
-        ? this.flowManager.getCurrentFace()
-        : null,
-      selectedFacelet: this.selectedFacelet,
-      errorFacelets: this.errorFacelets,
-      onFaceletSelect: this.handleFaceletSelect.bind(this)
-    });
-    cubeColumn.appendChild(this.cubeDisplay.getElement());
-    content.appendChild(cubeColumn);
-
-    // Right column: Sticky sidebar with controls
-    const controlsColumn = document.createElement('div');
-    controlsColumn.className = 'cube-configuration__controls-column';
-
-    const stickySidebar = document.createElement('div');
-    stickySidebar.className = 'cube-configuration__sticky-sidebar';
-
-    // Color palette in sidebar
+    // Color palette
     this.colorPalette = new ColorPalette({
       selectedColor: this.selectedColor,
       colorCounts: this.stateManager.getColorCounts(),
       isComplete: this.stateManager.getCubeState().metadata.isComplete,
       onColorSelect: this.handleColorSelect.bind(this)
     });
-    stickySidebar.appendChild(this.colorPalette.getElement());
+    content.appendChild(this.colorPalette.getElement());
 
-    // Navigation controls in sidebar
+    this.element.appendChild(content);
+
+    // Navigation controls
     if (this.options.guidedMode) {
       const state = this.stateManager.getCubeState();
       this.navigationControls = new NavigationControls({
@@ -162,13 +160,8 @@ export class CubeConfigurationContainer {
           this.flowManager.getCurrentStep() ===
             this.flowManager.getTotalSteps() - 1
       });
-      stickySidebar.appendChild(this.navigationControls.getElement());
+      this.element.appendChild(this.navigationControls.getElement());
     }
-
-    controlsColumn.appendChild(stickySidebar);
-    content.appendChild(controlsColumn);
-
-    this.element.appendChild(content);
 
     // Validation display (if there are errors)
     if (this.validationResult && !this.validationResult.isValid) {
@@ -199,6 +192,73 @@ export class CubeConfigurationContainer {
     actions.appendChild(resetButton);
 
     this.element.appendChild(actions);
+  }
+
+  /**
+   * Renders the cube view (2D or 3D)
+   */
+  private renderCubeView(container: HTMLElement): void {
+    if (this.currentView === '3d') {
+      // 3D Cube instructions
+      const cube3DInstructions = document.createElement('div');
+      cube3DInstructions.className = 'cube-3d-instructions';
+      cube3DInstructions.innerHTML = `
+        <p><strong>🖱️ Rotate:</strong> Click and drag to rotate the cube</p>
+        <p><strong>🖱️ Click:</strong> Click any square to select it, then pick a color below</p>
+        <p><strong>🔍 Zoom:</strong> Scroll to zoom in/out</p>
+      `;
+      container.appendChild(cube3DInstructions);
+
+      // Create 3D cube container
+      const cube3DContainer = document.createElement('div');
+      cube3DContainer.className = 'cube-3d-container';
+      container.appendChild(cube3DContainer);
+
+      // Initialize 3D cube
+      this.cube3D = new Cube3D(cube3DContainer, {
+        onFaceletSelect: this.handleFaceletSelect.bind(this)
+      });
+
+      // Update with current state
+      this.cube3D.updateCubeState(this.stateManager.getCubeState());
+      if (this.selectedFacelet) {
+        this.cube3D.highlightFacelet(this.selectedFacelet);
+      }
+    } else {
+      // 2D Cube
+      this.cubeDisplay = new CubeDisplay({
+        cubeState: this.stateManager.getCubeState(),
+        currentFace: this.options.guidedMode
+          ? this.flowManager.getCurrentFace()
+          : null,
+        selectedFacelet: this.selectedFacelet,
+        errorFacelets: this.errorFacelets,
+        onFaceletSelect: this.handleFaceletSelect.bind(this)
+      });
+      container.appendChild(this.cubeDisplay.getElement());
+    }
+  }
+
+  /**
+   * Handles view toggle between 2D and 3D
+   */
+  private handleViewToggle(view: '2d' | '3d'): void {
+    if (this.currentView === view) return;
+
+    this.currentView = view;
+
+    // Destroy current cube view
+    if (this.cube3D) {
+      this.cube3D.destroy();
+      this.cube3D = undefined;
+    }
+    if (this.cubeDisplay) {
+      this.cubeDisplay.destroy();
+      this.cubeDisplay = undefined;
+    }
+
+    // Re-render
+    this.render();
   }
 
   /**
@@ -271,15 +331,24 @@ export class CubeConfigurationContainer {
     const progress = this.stateManager.getProgress();
     const colorCounts = this.stateManager.getColorCounts();
 
-    // Update cube display
-    this.cubeDisplay?.update({
-      cubeState: state,
-      currentFace: this.options.guidedMode
-        ? this.flowManager.getCurrentFace()
-        : null,
-      selectedFacelet: this.selectedFacelet,
-      errorFacelets: this.errorFacelets
-    });
+    // Update cube display (2D or 3D)
+    if (this.currentView === '3d' && this.cube3D) {
+      this.cube3D.updateCubeState(state);
+      if (this.selectedFacelet) {
+        this.cube3D.highlightFacelet(this.selectedFacelet);
+      } else {
+        this.cube3D.highlightFacelet(null);
+      }
+    } else if (this.cubeDisplay) {
+      this.cubeDisplay.update({
+        cubeState: state,
+        currentFace: this.options.guidedMode
+          ? this.flowManager.getCurrentFace()
+          : null,
+        selectedFacelet: this.selectedFacelet,
+        errorFacelets: this.errorFacelets
+      });
+    }
 
     // Update color palette
     this.colorPalette?.update({
@@ -487,11 +556,13 @@ export class CubeConfigurationContainer {
    */
   public destroy(): void {
     this.cubeDisplay?.destroy();
+    this.cube3D?.destroy();
     this.colorPalette?.destroy();
     this.progressIndicator?.destroy();
     this.navigationControls?.destroy();
     this.validationDisplay?.destroy();
     this.orientationGuide?.destroy();
+    this.viewToggle?.destroy();
 
     this.stateManager.unsubscribeAll();
     this.element.innerHTML = '';

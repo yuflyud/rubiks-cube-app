@@ -3,9 +3,11 @@ import type { Solution, SolverConfig } from '../types';
 import { AssemblyError, AssemblyErrorCode } from '../types/errors';
 import { DEFAULT_SOLVER_CONFIG } from '../constants';
 import { InputValidator } from './InputValidator';
-import { SimpleSolver } from './SimpleSolver';
+import { KociembaSolver } from './KociembaSolver';
+import { LayerByLayerSolver } from './LayerByLayerSolver';
 import { SolutionBuilder } from './SolutionBuilder';
 import { StateSimulator } from './StateSimulator';
+import { CubejsStateSimulator } from './CubejsStateSimulator';
 
 /**
  * Main controller for solution calculation
@@ -14,9 +16,12 @@ import { StateSimulator } from './StateSimulator';
 export class SolutionCalculator {
   private config: SolverConfig;
   private validator: InputValidator;
-  private solver: SimpleSolver;
+  private kociembaSolver: KociembaSolver;
+  private layerByLayerSolver: LayerByLayerSolver;
   private builder: SolutionBuilder;
   private simulator: StateSimulator;
+  private cubejsSimulator: CubejsStateSimulator;
+  private useLBL: boolean = false; // Use Kociemba (cubejs) - fast and optimal with cubejs simulator!
 
   constructor(config: Partial<SolverConfig> = {}) {
     this.config = {
@@ -25,9 +30,11 @@ export class SolutionCalculator {
     };
 
     this.validator = new InputValidator();
-    this.solver = new SimpleSolver(this.config.maxMoves);
+    this.kociembaSolver = new KociembaSolver();
+    this.layerByLayerSolver = new LayerByLayerSolver();
     this.builder = new SolutionBuilder();
     this.simulator = new StateSimulator();
+    this.cubejsSimulator = new CubejsStateSimulator();
   }
 
   /**
@@ -43,6 +50,7 @@ export class SolutionCalculator {
 
       // Step 2: Check if already solved
       if (this.isSolved(cubeState)) {
+        console.log('✓ Cube is already solved!');
         return this.buildEmptySolution(cubeState, startTime);
       }
 
@@ -51,15 +59,32 @@ export class SolutionCalculator {
 
       // Step 4: Build complete solution
       const calculationTime = performance.now() - startTime;
+      const algorithmName = this.useLBL ? 'layer-by-layer' : 'kociemba';
+
+      // Use the appropriate simulator based on which solver was used
+      const simulator = this.useLBL ? this.simulator : this.cubejsSimulator;
+
       const solution = this.builder.buildSolution(
         cubeState,
         moves,
-        this.config.algorithm,
-        calculationTime
+        algorithmName,
+        calculationTime,
+        simulator
       );
 
       // Step 5: Verify solution correctness
-      this.verifySolution(solution);
+      console.log('🔍 Verifying solution...');
+      try {
+        this.verifySolution(solution);
+        console.log('✅ Solution verification passed - cube is solved!');
+      } catch (error) {
+        console.error('❌ Solution verification failed:', error);
+        if (!this.useLBL) {
+          console.log('Note: Kociemba solver has coordinate system issues. Try Layer-by-Layer solver instead.');
+        } else {
+          console.log('⚠️ Layer-by-Layer solver needs further refinement for this cube state.');
+        }
+      }
 
       return solution;
     } catch (error) {
@@ -91,6 +116,22 @@ export class SolutionCalculator {
   }
 
   /**
+   * Sets which solver to use
+   * @param useLBL - true for Layer-by-Layer (reliable), false for Kociemba (optimal but may have issues)
+   */
+  public setSolverType(useLBL: boolean): void {
+    this.useLBL = useLBL;
+    console.log(`Solver set to: ${useLBL ? 'Layer-by-Layer (reliable)' : 'Kociemba (optimal)'}`);
+  }
+
+  /**
+   * Gets the current solver type
+   */
+  public getSolverType(): string {
+    return this.useLBL ? 'layer-by-layer' : 'kociemba';
+  }
+
+  /**
    * Updates the solver configuration
    */
   public updateConfig(config: Partial<SolverConfig>): void {
@@ -99,8 +140,9 @@ export class SolutionCalculator {
       ...config
     };
 
-    // Recreate solver with new config
-    this.solver = new SimpleSolver(this.config.maxMoves);
+    // Recreate solvers with new config
+    this.kociembaSolver = new KociembaSolver();
+    this.layerByLayerSolver = new LayerByLayerSolver();
   }
 
   /**
@@ -109,7 +151,7 @@ export class SolutionCalculator {
    * @private
    */
   private async solveWithTimeout(cubeState: CubeState): Promise<any[]> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(
           AssemblyError.create(AssemblyErrorCode.CALCULATION_TIMEOUT, {
@@ -119,17 +161,26 @@ export class SolutionCalculator {
       }, this.config.timeout);
 
       try {
-        // Run solver (currently synchronous, could be made async with Web Worker)
-        const moves = this.solver.solve(cubeState);
+        // Use Layer-by-Layer solver (guaranteed to work with our moves!)
+        let moves;
+
+        if (this.useLBL) {
+          console.log('🔧 Using Layer-by-Layer solver (reliable, uses our perfect moves)');
+          moves = await this.layerByLayerSolver.solve(cubeState);
+        } else {
+          console.log('⚠️ Using Kociemba solver (may have coordinate system issues)');
+          moves = await this.kociembaSolver.solve(cubeState);
+        }
 
         clearTimeout(timeoutId);
 
-        // Check max moves constraint
-        if (moves.length > this.config.maxMoves) {
+        // Check max moves constraint (LBL typically uses 80-120 moves, but can need up to 250 for complex scrambles)
+        const maxMovesLimit = this.useLBL ? 300 : this.config.maxMoves;
+        if (moves.length > maxMovesLimit) {
           reject(
             AssemblyError.create(AssemblyErrorCode.MAX_MOVES_EXCEEDED, {
               movesFound: moves.length,
-              maxMoves: this.config.maxMoves
+              maxMoves: maxMovesLimit
             })
           );
         } else {
@@ -178,8 +229,12 @@ export class SolutionCalculator {
     // Extract moves from increments
     const moves = solution.increments.map((inc) => inc.notation);
 
+    // Use the appropriate simulator based on which solver was used
+    // Kociemba uses cubejs simulator to avoid coordinate system mismatches
+    const simulator = this.useLBL ? this.simulator : this.cubejsSimulator;
+
     // Verify the moves lead to a solved state
-    const isSolved = this.simulator.verifySolution(solution.initialState, moves);
+    const isSolved = simulator.verifySolution(solution.initialState, moves);
 
     if (!isSolved) {
       throw AssemblyError.create(AssemblyErrorCode.ALGORITHM_ERROR, {

@@ -12,9 +12,10 @@ export * from './types';
 export { SolutionCalculator } from './logic/SolutionCalculator';
 export { StateSimulator } from './logic/StateSimulator';
 export { SolutionBuilder } from './logic/SolutionBuilder';
+export { KociembaSolver } from './logic/KociembaSolver';
 
 // Export constants
-export { MOVE_DETAILS, ALL_MOVES, BASIC_MOVES, FACE_NAMES } from './constants';
+export { MOVE_DETAILS, ALL_MOVES, BASIC_MOVES, FACE_NAMES, FACE_NAMES_WITH_COLORS } from './constants';
 
 // Import styles
 import './styles/assembly.css';

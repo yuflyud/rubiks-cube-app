@@ -1,4 +1,6 @@
 import type { Solution } from '../../assembly/types';
+import type { CubeState } from '../../configuration/types';
+import { StateSimulator } from '../../assembly/logic/StateSimulator';
 
 /**
  * Modal displayed when solution is complete
@@ -8,6 +10,8 @@ export class CompletionModal {
   private overlay: HTMLElement;
   private modal: HTMLElement;
   private solution: Solution;
+  private finalState?: CubeState;
+  private simulator: StateSimulator;
 
   private onRestart: () => void;
   private onNewCube: () => void;
@@ -19,9 +23,12 @@ export class CompletionModal {
       onRestart: () => void;
       onNewCube: () => void;
       onClose: () => void;
-    }
+    },
+    finalState?: CubeState
   ) {
     this.solution = solution;
+    this.finalState = finalState;
+    this.simulator = new StateSimulator();
     this.onRestart = callbacks.onRestart;
     this.onNewCube = callbacks.onNewCube;
     this.onClose = callbacks.onClose;
@@ -114,6 +121,9 @@ export class CompletionModal {
     message.className = 'completion-message';
     message.textContent = 'You\'ve successfully completed the solution!';
 
+    // Verification status
+    const verification = this.createVerificationStatus();
+
     // Statistics
     const stats = this.createStatistics();
 
@@ -123,10 +133,46 @@ export class CompletionModal {
     this.modal.appendChild(icon);
     this.modal.appendChild(title);
     this.modal.appendChild(message);
+    this.modal.appendChild(verification);
     this.modal.appendChild(stats);
     this.modal.appendChild(actions);
 
     this.overlay.appendChild(this.modal);
+  }
+
+  /**
+   * Creates the verification status section
+   */
+  private createVerificationStatus(): HTMLElement {
+    const container = document.createElement('div');
+    container.className = 'completion-verification';
+
+    // Check if final state is solved
+    const isSolved = this.finalState ? this.simulator.isSolved(this.finalState) : false;
+
+    if (isSolved) {
+      container.innerHTML = `
+        <div class="verification-status verification-status--success">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="9" fill="#10b981" stroke="#059669" stroke-width="1"/>
+            <path d="M6 10 L9 13 L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Cube is fully solved! All faces match their center colors.</span>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="verification-status verification-status--info">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="9" fill="#3b82f6" stroke="#2563eb" stroke-width="1"/>
+            <path d="M10 6 L10 11 M10 14 L10 15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Solution sequence completed. Check console for verification details.</span>
+        </div>
+      `;
+    }
+
+    return container;
   }
 
   /**

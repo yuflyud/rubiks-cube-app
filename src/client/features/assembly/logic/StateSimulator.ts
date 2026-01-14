@@ -50,8 +50,51 @@ export class StateSimulator {
    * Verifies that a move sequence solves the cube
    */
   public verifySolution(initialState: CubeState, moves: MoveNotation[]): boolean {
+    console.log(`Applying ${moves.length} moves to verify solution...`);
+
+    // Log move-by-move for first few moves
+    if (moves.length <= 10) {
+      console.log('Move-by-move verification:');
+      let currentState = initialState;
+      for (let i = 0; i < moves.length; i++) {
+        currentState = this.applyMove(currentState, moves[i]);
+        console.log(`  ${i + 1}. ${MoveNotation[moves[i]]} - Solved: ${this.isSolved(currentState)}`);
+      }
+    }
+
     const finalState = this.applyMoves(initialState, moves);
-    return this.isSolved(finalState);
+    const solved = this.isSolved(finalState);
+
+    if (!solved) {
+      console.log('Final state after applying all moves:');
+      this.logCubeState(finalState);
+    }
+
+    return solved;
+  }
+
+  /**
+   * Logs the cube state for debugging
+   */
+  private logCubeState(state: CubeState): void {
+    const faceMap = {
+      'U': 'UP (White)',
+      'D': 'DOWN (Yellow)',
+      'L': 'LEFT (Orange)',
+      'R': 'RIGHT (Red)',
+      'F': 'FRONT (Green)',
+      'B': 'BACK (Blue)'
+    };
+
+    Object.entries(state.faces).forEach(([faceKey, faceColors]) => {
+      const faceName = faceMap[faceKey as keyof typeof faceMap] || faceKey;
+      const centerColor = faceColors[4];
+      const allMatch = faceColors.every(color => color === centerColor);
+      console.log(`${faceName}: ${allMatch ? '✓' : '✗'} (center: ${centerColor})`);
+      console.log(`  ${faceColors[0]} ${faceColors[1]} ${faceColors[2]}`);
+      console.log(`  ${faceColors[3]} ${faceColors[4]} ${faceColors[5]}`);
+      console.log(`  ${faceColors[6]} ${faceColors[7]} ${faceColors[8]}`);
+    });
   }
 
   /**

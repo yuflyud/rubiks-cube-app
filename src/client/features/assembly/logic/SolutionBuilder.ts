@@ -26,10 +26,14 @@ export class SolutionBuilder {
     initialState: CubeState,
     moves: MoveNotation[],
     algorithmUsed: string,
-    calculationTimeMs: number
+    calculationTimeMs: number,
+    simulator?: { generateIntermediateStates: (state: CubeState, moves: MoveNotation[]) => CubeState[]; isSolved: (state: CubeState) => boolean; }
   ): Solution {
+    // Use provided simulator or default
+    const sim = simulator || this.simulator;
+
     // Generate intermediate states
-    const states = this.simulator.generateIntermediateStates(initialState, moves);
+    const states = sim.generateIntermediateStates(initialState, moves);
 
     // Create assembly increments
     const increments = this.createIncrements(moves, states);
@@ -37,8 +41,8 @@ export class SolutionBuilder {
     // Determine if solved
     const isSolved =
       moves.length === 0
-        ? this.simulator.isSolved(initialState)
-        : this.simulator.isSolved(states[states.length - 1]);
+        ? sim.isSolved(initialState)
+        : sim.isSolved(states[states.length - 1]);
 
     // Create metadata
     const metadata: SolutionMetadata = {

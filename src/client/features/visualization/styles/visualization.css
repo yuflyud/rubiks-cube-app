@@ -356,3 +356,29 @@
     @apply hidden;
   }
 }
+
+/* Verification Status */
+.completion-verification {
+  @apply mb-6;
+}
+
+.verification-status {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg;
+  @apply border text-sm font-medium;
+}
+
+.verification-status--success {
+  @apply bg-emerald-50 border-emerald-200 text-emerald-800;
+}
+
+.verification-status--info {
+  @apply bg-blue-50 border-blue-200 text-blue-800;
+}
+
+.verification-status svg {
+  @apply flex-shrink-0;
+}
+
+.verification-status span {
+  @apply flex-1;
+}

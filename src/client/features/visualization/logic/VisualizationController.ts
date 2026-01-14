@@ -322,23 +322,39 @@ export class VisualizationController {
     this.state.isComplete = true;
     this.pause();
 
-    // Show completion modal
-    this.completionModal = new CompletionModal(this.state.solution, {
-      onRestart: () => {
-        this.reset();
-        if (this.onRestart) {
-          this.onRestart();
+    // Log final state verification
+    console.log('🎯 Solution complete! Verifying final state...');
+    const isSolved = this.simulator.isSolved(this.state.currentCubeState);
+    if (isSolved) {
+      console.log('✅ Cube is fully solved!');
+    } else {
+      console.log('⚠️ Final state verification: Cube state does not match expected solved state');
+      console.log('This may indicate a difference between the solver and move executor');
+      console.log('Final cube state:');
+      this.logCubeState(this.state.currentCubeState);
+    }
+
+    // Show completion modal with final state
+    this.completionModal = new CompletionModal(
+      this.state.solution,
+      {
+        onRestart: () => {
+          this.reset();
+          if (this.onRestart) {
+            this.onRestart();
+          }
+        },
+        onNewCube: () => {
+          if (this.onNewCube) {
+            this.onNewCube();
+          }
+        },
+        onClose: () => {
+          // Just close modal
         }
       },
-      onNewCube: () => {
-        if (this.onNewCube) {
-          this.onNewCube();
-        }
-      },
-      onClose: () => {
-        // Just close modal
-      }
-    });
+      this.state.currentCubeState
+    );
 
     this.completionModal.show();
 
@@ -346,6 +362,7 @@ export class VisualizationController {
       this.onComplete();
     }
   }
+
 
   /**
    * Gets current step information
@@ -439,4 +456,29 @@ export class VisualizationController {
 
     this.container.innerHTML = '';
   }
+
+  /**
+   * Logs the cube state for debugging
+   */
+  private logCubeState(state: CubeState): void {
+    const faceMap = {
+      'U': 'UP (White)',
+      'D': 'DOWN (Yellow)',
+      'L': 'LEFT (Orange)',
+      'R': 'RIGHT (Red)',
+      'F': 'FRONT (Green)',
+      'B': 'BACK (Blue)'
+    };
+
+    Object.entries(state.faces).forEach(([faceKey, faceColors]) => {
+      const faceName = faceMap[faceKey as keyof typeof faceMap] || faceKey;
+      const centerColor = faceColors[4];
+      const allMatch = faceColors.every(color => color === centerColor);
+      console.log(`${faceName}: ${allMatch ? '✓' : '✗'} (center: ${centerColor})`);
+      console.log(`  ${faceColors[0]} ${faceColors[1]} ${faceColors[2]}`);
+      console.log(`  ${faceColors[3]} ${faceColors[4]} ${faceColors[5]}`);
+      console.log(`  ${faceColors[6]} ${faceColors[7]} ${faceColors[8]}`);
+    });
+  }
+
 }

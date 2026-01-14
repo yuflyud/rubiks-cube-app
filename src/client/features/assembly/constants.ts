@@ -168,3 +168,15 @@ export const FACE_NAMES: Record<Face, string> = {
   [Face.FRONT]: 'Front',
   [Face.BACK]: 'Back'
 };
+
+/**
+ * Face names with center colors for better user guidance
+ */
+export const FACE_NAMES_WITH_COLORS: Record<Face, string> = {
+  [Face.UP]: 'Top (white center)',
+  [Face.DOWN]: 'Bottom (yellow center)',
+  [Face.LEFT]: 'Left (orange center)',
+  [Face.RIGHT]: 'Right (red center)',
+  [Face.FRONT]: 'Front (green center)',
+  [Face.BACK]: 'Back (blue center)'
+};

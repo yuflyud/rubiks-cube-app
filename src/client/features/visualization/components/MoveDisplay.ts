@@ -1,5 +1,5 @@
 import type { AssemblyIncrement } from '../../assembly/types';
-import { FACE_NAMES } from '../../assembly/constants';
+import { FACE_NAMES_WITH_COLORS } from '../../assembly/constants';
 
 /**
  * Displays the current move information
@@ -56,9 +56,9 @@ export class MoveDisplay {
     this.descriptionElement.textContent = move.description;
 
     // Update face info
-    const faceName = FACE_NAMES[move.face];
+    const faceName = FACE_NAMES_WITH_COLORS[move.face];
     const directionText = move.direction === 'clockwise' ? '↻' : '↺';
-    this.faceInfoElement.textContent = `${faceName} face ${directionText} ${move.degrees}°`;
+    this.faceInfoElement.textContent = `${faceName} ${directionText} ${move.degrees}°`;
   }
 
   /**

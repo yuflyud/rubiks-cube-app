@@ -1,6 +1,6 @@
 import { Face, Color, FaceletPosition } from '../types';
 import { FaceletCell, FaceletCellProps } from './FaceletCell';
-import { FACE_TO_COLOR } from '../constants';
+import { FACE_TO_COLOR, FACE_NAMES } from '../constants';
 
 export interface FaceGridProps {
   face: Face;
@@ -36,10 +36,14 @@ export class FaceGrid {
       container.classList.add('face-grid--highlighted');
     }
 
-    // Create face label
+    // Create face label with user-friendly name
     const label = document.createElement('div');
     label.className = 'face-grid__label';
-    label.textContent = this.props.face;
+    const faceInfo = FACE_NAMES[this.props.face];
+    label.innerHTML = `
+      <span class="face-name">${faceInfo.name}</span>
+      <span class="face-description">${faceInfo.description}</span>
+    `;
     container.appendChild(label);
 
     // Create grid container
