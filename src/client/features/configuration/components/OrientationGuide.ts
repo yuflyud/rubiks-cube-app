@@ -104,29 +104,29 @@ export class OrientationGuide {
     diagram.className = 'orientation-diagram';
     diagram.innerHTML = `
       <div class="cube-diagram">
-        <div class="cube-face cube-top">
+        <div class="cube-face-main-page cube-top">
           <span class="face-label">TOP</span>
           <span class="face-color">White ⬜</span>
         </div>
         <div class="cube-middle">
-          <div class="cube-face cube-left">
+          <div class="cube-face-main-page cube-left">
             <span class="face-label">LEFT</span>
             <span class="face-color">🟧 Orange</span>
           </div>
-          <div class="cube-face cube-front">
+          <div class="cube-face-main-page cube-front">
             <span class="face-label">FRONT</span>
             <span class="face-color">🟩 Green</span>
           </div>
-          <div class="cube-face cube-right">
+          <div class="cube-face-main-page cube-right">
             <span class="face-label">RIGHT</span>
             <span class="face-color">Red 🟥</span>
           </div>
-          <div class="cube-face cube-back">
+          <div class="cube-face-main-page cube-back">
             <span class="face-label">BACK</span>
             <span class="face-color">🟦 Blue</span>
           </div>
         </div>
-        <div class="cube-face cube-bottom">
+        <div class="cube-face-main-page cube-bottom">
           <span class="face-label">BOTTOM</span>
           <span class="face-color">Yellow 🟨</span>
         </div>

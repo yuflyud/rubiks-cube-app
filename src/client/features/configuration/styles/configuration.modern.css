@@ -471,6 +471,7 @@
   display: flex;
   gap: var(--spacing-md);
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .navigation-controls__button {
@@ -945,6 +946,7 @@
 .orientation-guide__3d-wrapper {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 16px;
 }
 
@@ -965,10 +967,22 @@
 
 .cube-middle {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
+}
+
+.cube-face-main-page {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.3s ease;
 }
 
 .cube-face {
@@ -994,26 +1008,24 @@
   max-width: 200px;
 }
 
-.cube-front {
-  grid-column: 2;
-}
-
-.cube-back {
-  display: none; /* Hidden in simplified view */
-}
-
 .face-label {
+  display: block;
   font-size: 12px;
   font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  line-height: 1.2;
 }
 
 .face-color {
+  display: block;
   font-size: 14px;
   font-weight: 600;
   color: #1e293b;
+  line-height: 1.4;
+  word-wrap: break-word;
 }
 
 /* Animations */

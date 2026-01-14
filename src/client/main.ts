@@ -217,15 +217,24 @@ function showNotification(
   message: string,
   type: 'success' | 'error' | 'info'
 ): void {
+  // Get or create notification container
+  let container = document.getElementById('notification-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'notification-container';
+    container.className = 'fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none';
+    document.body.appendChild(container);
+  }
+
   const notification = document.createElement('div');
   notification.className = `
-    fixed top-6 right-6 z-50
     px-6 py-4 rounded-xl
     shadow-elegant-xl
     backdrop-blur-xl
     border
     animate-slide-in-right
     flex items-center gap-3
+    pointer-events-auto
     ${
       type === 'success'
         ? 'bg-emerald-500/90 border-emerald-400/50 text-white'
@@ -241,12 +250,18 @@ function showNotification(
     <span class="font-medium">${message}</span>
   `;
 
-  document.body.appendChild(notification);
+  container.appendChild(notification);
 
   // Remove after 5 seconds with fade out
   setTimeout(() => {
     notification.style.animation = 'fadeOut 0.3s ease-out';
-    setTimeout(() => notification.remove(), 300);
+    setTimeout(() => {
+      notification.remove();
+      // Remove container if empty
+      if (container && container.children.length === 0) {
+        container.remove();
+      }
+    }, 300);
   }, 5000);
 }
 

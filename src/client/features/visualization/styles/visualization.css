@@ -44,6 +44,14 @@
 }
 
 /* Single Face */
+.cube-face-main-page {
+  @apply relative;
+  @apple flex flex-col gap-2;
+  @apply p-4 rounded-lg;
+  @apply bg-slate-100 border-2 border-slate-300;
+  @apply transition-all duration-300;
+}
+
 .cube-face {
   @apply relative;
   @apply grid grid-cols-3 gap-1;

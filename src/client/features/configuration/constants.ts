@@ -186,7 +186,7 @@ export const FACE_NAMES: Record<Face, { name: string; color: Color; description:
   [Face.RIGHT]: {
     name: 'Right (Red)',
     color: Color.RED,
-    description: 'The face on your right side (usually red, opposite of orange)'
+    description: 'The face on your right side (usually red)'
   }
 };
 
