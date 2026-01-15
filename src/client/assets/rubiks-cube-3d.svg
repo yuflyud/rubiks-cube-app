@@ -1,0 +1,53 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shadow -->
+  <ellipse cx="40" cy="72" rx="24" ry="5" fill="#000000" opacity="0.15"/>
+
+  <!-- Top face (Yellow) -->
+  <path d="M40 12 L62 24 L40 36 L18 24 Z" fill="#FFD700" stroke="#1a1a1a" stroke-width="1.5"/>
+  <line x1="40" y1="12" x2="40" y2="36" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="40" y1="36" x2="62" y2="24" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="40" y1="36" x2="18" y2="24" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="29" y1="18" x2="29" y2="30" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="51" y1="18" x2="51" y2="30" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="24" y1="21" x2="34" y2="27" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="46" y1="27" x2="56" y2="21" stroke="#1a1a1a" stroke-width="1"/>
+
+  <!-- Left face (Orange) -->
+  <path d="M18 24 L40 36 L40 60 L18 48 Z" fill="#FF5722" stroke="#1a1a1a" stroke-width="1.5"/>
+  <line x1="18" y1="32" x2="40" y2="44" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="18" y1="40" x2="40" y2="52" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="24" y1="28" x2="24" y2="52" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="32" y1="32" x2="32" y2="56" stroke="#1a1a1a" stroke-width="1"/>
+
+  <!-- Add darker shading to left face -->
+  <path d="M18 24 L40 36 L40 60 L18 48 Z" fill="#000000" opacity="0.15"/>
+
+  <!-- Right face (Red) -->
+  <path d="M40 36 L62 24 L62 48 L40 60 Z" fill="#C62828" stroke="#1a1a1a" stroke-width="1.5"/>
+  <line x1="40" y1="44" x2="62" y2="32" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="40" y1="52" x2="62" y2="40" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="48" y1="32" x2="48" y2="56" stroke="#1a1a1a" stroke-width="1"/>
+  <line x1="56" y1="28" x2="56" y2="52" stroke="#1a1a1a" stroke-width="1"/>
+
+  <!-- Add slight shading to right face -->
+  <path d="M40 36 L62 24 L62 48 L40 60 Z" fill="#000000" opacity="0.08"/>
+
+  <!-- Top face details (Yellow sections) -->
+  <path d="M40 12 L51 18 L40 24 L29 18 Z" fill="#FFE57F"/>
+  <path d="M29 18 L40 24 L40 36 L18 24 Z" fill="#FFD54F"/>
+  <path d="M40 24 L51 18 L62 24 L40 36 Z" fill="#FFEB3B"/>
+
+  <!-- Left face details (Orange sections) -->
+  <path d="M18 24 L24 28 L24 36 L18 32 Z" fill="#FF7043"/>
+  <path d="M24 28 L32 32 L32 40 L24 36 Z" fill="#FF6E40"/>
+  <path d="M18 32 L24 36 L24 44 L18 40 Z" fill="#FF5722"/>
+
+  <!-- Right face details (Red/Blue/Yellow mix) -->
+  <path d="M40 36 L48 32 L48 40 L40 44 Z" fill="#E53935"/>
+  <path d="M48 32 L56 28 L56 36 L48 40 Z" fill="#1976D2"/>
+  <path d="M40 44 L48 40 L48 48 L40 52 Z" fill="#FFEB3B"/>
+
+  <!-- White highlights for depth -->
+  <path d="M40 12 L51 18 L40 24 Z" fill="#FFFFFF" opacity="0.3"/>
+  <path d="M48 32 L56 28 L62 24 L56 36 Z" fill="#FFFFFF" opacity="0.15"/>
+</svg>

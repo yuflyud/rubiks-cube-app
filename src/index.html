@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rubik's Cube Solver</title>
+  <title>Rubik's Cube Solver - Professional Configuration Tool</title>
+  <meta name="description" content="Configure your Rubik's cube state and get step-by-step solution instructions with our elegant, modern interface">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
+    /* Minimal loading state - Tailwind will load soon */
     * {
       margin: 0;
       padding: 0;
@@ -13,42 +17,119 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(to bottom right, #f8fafc, #ffffff, #f1f5f9);
       min-height: 100vh;
+      antialiased: true;
+    }
+
+    #app {
+      min-height: 100vh;
+    }
+
+    /* Elegant loading state */
+    .loading {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      min-height: 100vh;
+      flex-direction: column;
+      gap: 32px;
     }
 
-    .container {
-      text-align: center;
-      padding: 2rem;
+    .loading__cube {
+      animation: float 3s ease-in-out infinite;
     }
 
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      animation: fadeIn 1s ease-in;
+    .loading__cube svg {
+      width: 80px;
+      height: 80px;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
+    .loading__spinner {
+      width: 64px;
+      height: 64px;
+      border: 4px solid rgba(59, 130, 246, 0.1);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    }
+
+    .loading__text {
+      color: #64748b;
+      font-size: 1.25rem;
+      font-weight: 500;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes spin {
       to {
-        opacity: 1;
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
         transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Hello AI explorers.</h1>
+  <div id="app">
+    <div class="loading">
+      <div class="loading__cube">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="40" cy="72" rx="24" ry="5" fill="#000000" opacity="0.15"/>
+          <path d="M40 12 L62 24 L40 36 L18 24 Z" fill="#FFD700" stroke="#1a1a1a" stroke-width="1.5"/>
+          <line x1="40" y1="12" x2="40" y2="36" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="40" y1="36" x2="62" y2="24" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="40" y1="36" x2="18" y2="24" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="29" y1="18" x2="29" y2="30" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="51" y1="18" x2="51" y2="30" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="24" y1="21" x2="34" y2="27" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="46" y1="27" x2="56" y2="21" stroke="#1a1a1a" stroke-width="1"/>
+          <path d="M18 24 L40 36 L40 60 L18 48 Z" fill="#FF5722" stroke="#1a1a1a" stroke-width="1.5"/>
+          <line x1="18" y1="32" x2="40" y2="44" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="18" y1="40" x2="40" y2="52" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="24" y1="28" x2="24" y2="52" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="32" y1="32" x2="32" y2="56" stroke="#1a1a1a" stroke-width="1"/>
+          <path d="M18 24 L40 36 L40 60 L18 48 Z" fill="#000000" opacity="0.15"/>
+          <path d="M40 36 L62 24 L62 48 L40 60 Z" fill="#C62828" stroke="#1a1a1a" stroke-width="1.5"/>
+          <line x1="40" y1="44" x2="62" y2="32" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="40" y1="52" x2="62" y2="40" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="48" y1="32" x2="48" y2="56" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="56" y1="28" x2="56" y2="52" stroke="#1a1a1a" stroke-width="1"/>
+          <path d="M40 36 L62 24 L62 48 L40 60 Z" fill="#000000" opacity="0.08"/>
+          <path d="M40 12 L51 18 L40 24 L29 18 Z" fill="#FFE57F"/>
+          <path d="M29 18 L40 24 L40 36 L18 24 Z" fill="#FFD54F"/>
+          <path d="M40 24 L51 18 L62 24 L40 36 Z" fill="#FFEB3B"/>
+          <path d="M18 24 L24 28 L24 36 L18 32 Z" fill="#FF7043"/>
+          <path d="M24 28 L32 32 L32 40 L24 36 Z" fill="#FF6E40"/>
+          <path d="M18 32 L24 36 L24 44 L18 40 Z" fill="#FF5722"/>
+          <path d="M40 36 L48 32 L48 40 L40 44 Z" fill="#E53935"/>
+          <path d="M48 32 L56 28 L56 36 L48 40 Z" fill="#1976D2"/>
+          <path d="M40 44 L48 40 L48 48 L40 52 Z" fill="#FFEB3B"/>
+          <path d="M40 12 L51 18 L40 24 Z" fill="#FFFFFF" opacity="0.3"/>
+          <path d="M48 32 L56 28 L62 24 L56 36 Z" fill="#FFFFFF" opacity="0.15"/>
+        </svg>
+      </div>
+      <div class="loading__spinner"></div>
+      <div class="loading__text">Loading Elegant Interface...</div>
+    </div>
   </div>
-  <script type="module" src="/main.ts"></script>
+  <script type="module" src="/client/main.ts"></script>
 </body>
 </html>

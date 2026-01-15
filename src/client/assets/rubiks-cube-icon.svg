@@ -1,0 +1,27 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shadow -->
+  <ellipse cx="32" cy="58" rx="20" ry="4" fill="#94A3B8" opacity="0.3"/>
+
+  <!-- Back face (dark blue) -->
+  <path d="M32 8 L50 18 L50 38 L32 48 L14 38 L14 18 Z" fill="#1E293B" stroke="#0F172A" stroke-width="2"/>
+
+  <!-- Left face -->
+  <path d="M14 18 L32 28 L32 48 L14 38 Z" fill="#FF5800" stroke="#0F172A" stroke-width="2"/>
+  <rect x="17" y="22" width="6" height="6" rx="1" fill="#B71234" stroke="#0F172A" stroke-width="1"/>
+  <rect x="17" y="30" width="6" height="6" rx="1" fill="#FFFFFF" stroke="#0F172A" stroke-width="1"/>
+  <rect x="24" y="26" width="6" height="6" rx="1" fill="#FF5800" stroke="#0F172A" stroke-width="1"/>
+
+  <!-- Right face -->
+  <path d="M32 28 L50 18 L50 38 L32 48 Z" fill="#009B48" stroke="#0F172A" stroke-width="2"/>
+  <rect x="35" y="22" width="6" height="6" rx="1" fill="#009B48" stroke="#0F172A" stroke-width="1"/>
+  <rect x="35" y="30" width="6" height="6" rx="1" fill="#FFD500" stroke="#0F172A" stroke-width="1"/>
+  <rect x="42" y="26" width="6" height="6" rx="1" fill="#0046AD" stroke="#0F172A" stroke-width="1"/>
+
+  <!-- Top face -->
+  <path d="M32 8 L50 18 L32 28 L14 18 Z" fill="#FFFFFF" stroke="#0F172A" stroke-width="2"/>
+  <rect x="20" y="14" width="5" height="5" rx="1" fill="#B71234" stroke="#0F172A" stroke-width="1" transform="rotate(-26.5 22.5 16.5)"/>
+  <rect x="28" y="10" width="5" height="5" rx="1" fill="#FFFFFF" stroke="#0F172A" stroke-width="1" transform="rotate(-26.5 30.5 12.5)"/>
+  <rect x="36" y="14" width="5" height="5" rx="1" fill="#FFD500" stroke="#0F172A" stroke-width="1" transform="rotate(-26.5 38.5 16.5)"/>
+  <rect x="24" y="18" width="5" height="5" rx="1" fill="#0046AD" stroke="#0F172A" stroke-width="1" transform="rotate(-26.5 26.5 20.5)"/>
+  <rect x="32" y="14" width="5" height="5" rx="1" fill="#009B48" stroke="#0F172A" stroke-width="1" transform="rotate(-26.5 34.5 16.5)"/>
+</svg>

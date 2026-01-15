@@ -1,0 +1,392 @@
+/**
+ * Visualization Feature Styles
+ * 2D Cube Display with Step-by-Step Animation
+ */
+
+/* Main Layout */
+.visualization-layout {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  @apply flex flex-col gap-8;
+  @apply animate-fade-in;
+}
+
+/* Header */
+.visualization-header {
+  @apply text-center;
+}
+
+.visualization-title {
+  @apply text-4xl md:text-5xl font-bold text-gradient mb-2;
+}
+
+.visualization-subtitle {
+  @apply text-slate-600 text-lg;
+}
+
+/* Cube Display Container */
+.visualization-cube-container {
+  @apply flex justify-center items-center;
+  @apply bg-white/60 backdrop-blur-xl;
+  @apply border border-white/20 rounded-3xl;
+  @apply shadow-elegant-xl p-8;
+}
+
+.cube-display-2d {
+  @apply w-full max-w-4xl;
+}
+
+.cube-layout {
+  @apply flex flex-col gap-2;
+}
+
+.cube-row {
+  @apply flex gap-2 justify-center;
+}
+
+/* Single Face */
+.cube-face-main-page {
+  @apply relative;
+  @apple flex flex-col gap-2;
+  @apply p-4 rounded-lg;
+  @apply bg-slate-100 border-2 border-slate-300;
+  @apply transition-all duration-300;
+}
+
+.cube-face {
+  @apply relative;
+  @apply grid grid-cols-3 gap-1;
+  @apply p-4 rounded-lg;
+  @apply bg-slate-100 border-2 border-slate-300;
+  @apply transition-all duration-300;
+}
+
+.cube-face--highlighted {
+  @apply border-blue-500 border-4;
+  @apply shadow-lg shadow-blue-500/50;
+  @apply scale-105;
+}
+
+.cube-face--animating {
+  @apply animate-pulse;
+}
+
+.cube-face-spacer {
+  @apply w-24 h-24;
+}
+
+/* Facelet (Individual Cube Sticker) */
+.cube-facelet {
+  @apply w-8 h-8 rounded-sm;
+  @apply transition-all duration-200;
+  @apply shadow-sm;
+}
+
+.cube-facelet--center {
+  @apply ring-2 ring-slate-400;
+}
+
+/* Face Label */
+.cube-face-label {
+  @apply absolute -bottom-2 left-1/2 transform -translate-x-1/2;
+  @apply text-xs font-semibold text-slate-600;
+  @apply bg-white px-2 py-1 rounded-full;
+  @apply shadow-sm;
+}
+
+/* Move Display */
+.visualization-move-container {
+  @apply flex justify-center;
+}
+
+.move-display {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600;
+  @apply text-white rounded-2xl p-6;
+  @apply shadow-elegant-lg;
+  @apply min-w-[400px] text-center;
+  @apply transition-all duration-300;
+}
+
+.move-display--active {
+  @apply from-emerald-500 to-emerald-600;
+  @apply animate-scale-in;
+}
+
+.move-display-header {
+  @apply text-sm font-semibold opacity-90 mb-2;
+}
+
+.move-notation {
+  @apply text-6xl font-bold mb-2;
+  @apply drop-shadow-lg;
+}
+
+.move-face-info {
+  @apply text-xl font-medium mb-2;
+}
+
+.move-description {
+  @apply text-base opacity-90;
+}
+
+/* Navigation Controls */
+.visualization-nav-container {
+  @apply flex justify-center;
+}
+
+.navigation-controls {
+  @apply bg-white/60 backdrop-blur-xl;
+  @apply border border-white/20 rounded-2xl;
+  @apply shadow-elegant-lg p-6;
+  @apply w-full max-w-2xl;
+}
+
+.controls-row {
+  @apply flex items-center justify-between gap-4 mb-4;
+}
+
+.nav-button {
+  @apply flex items-center gap-2 px-6 py-3;
+  @apply bg-gradient-to-r from-blue-500 to-blue-600;
+  @apply text-white font-semibold rounded-xl;
+  @apply transition-all duration-200;
+  @apply hover:scale-105 hover:shadow-lg;
+  @apply active:scale-95;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+}
+
+.nav-button--previous {}
+
+.nav-button--next {}
+
+.step-indicator {
+  @apply text-2xl font-bold text-slate-900;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+  @apply w-full;
+}
+
+.progress-bar {
+  @apply w-full h-3 bg-slate-200 rounded-full overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full bg-gradient-to-r from-blue-500 to-blue-600;
+  @apply transition-all duration-500 ease-out;
+}
+
+/* Playback Controls */
+.visualization-playback-container {
+  @apply flex justify-center;
+}
+
+.playback-controls {
+  @apply bg-white/60 backdrop-blur-xl;
+  @apply border border-white/20 rounded-2xl;
+  @apply shadow-elegant-lg p-6;
+  @apply flex items-center justify-between gap-6;
+  @apply w-full max-w-2xl;
+}
+
+.playback-buttons-group {
+  @apply flex items-center gap-3;
+}
+
+.playback-button {
+  @apply flex items-center gap-2 px-5 py-3;
+  @apply bg-slate-200 text-slate-900 font-semibold rounded-xl;
+  @apply transition-all duration-200;
+  @apply hover:bg-slate-300 hover:scale-105;
+  @apply active:scale-95;
+}
+
+.playback-button--play-pause {}
+
+.playback-button--playing {
+  @apply bg-gradient-to-r from-emerald-500 to-emerald-600;
+  @apply text-white;
+}
+
+.playback-button--reset {}
+
+.speed-selector-container {
+  @apply flex items-center gap-3;
+}
+
+.speed-label {
+  @apply flex items-center gap-2 text-slate-700 font-semibold;
+}
+
+.speed-selector {
+  @apply px-4 py-2 rounded-lg;
+  @apply bg-white border-2 border-slate-300;
+  @apply text-slate-900 font-medium;
+  @apply transition-all duration-200;
+  @apply hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500;
+  @apply cursor-pointer;
+}
+
+/* Completion Modal */
+.completion-overlay {
+  @apply fixed inset-0 z-50;
+  @apply bg-black/50 backdrop-blur-sm;
+  @apply flex items-center justify-center p-4;
+  @apply opacity-0 transition-opacity duration-300;
+}
+
+.completion-overlay--visible {
+  @apply opacity-100;
+}
+
+.completion-modal {
+  @apply bg-white rounded-3xl p-8;
+  @apply shadow-2xl max-w-md w-full;
+  @apply transform scale-90 opacity-0;
+  @apply transition-all duration-300;
+}
+
+.completion-modal--visible {
+  @apply scale-100 opacity-100;
+}
+
+.completion-icon {
+  @apply flex justify-center mb-6;
+  @apply animate-scale-in;
+}
+
+.completion-title {
+  @apply text-4xl font-bold text-center text-slate-900 mb-4;
+}
+
+.completion-message {
+  @apply text-lg text-center text-slate-600 mb-6;
+}
+
+/* Completion Statistics */
+.completion-stats {
+  @apply grid grid-cols-2 gap-4 mb-6;
+  @apply bg-slate-50 rounded-xl p-4;
+}
+
+.completion-stat-item {
+  @apply flex flex-col;
+}
+
+.completion-stat-label {
+  @apply text-sm text-slate-500 font-medium;
+}
+
+.completion-stat-value {
+  @apply text-xl font-bold text-slate-900;
+}
+
+/* Completion Actions */
+.completion-actions {
+  @apply flex gap-3;
+}
+
+.completion-button {
+  @apply flex-1 px-6 py-3 rounded-xl font-semibold;
+  @apply transition-all duration-200;
+  @apply hover:scale-105 active:scale-95;
+}
+
+.completion-button--primary {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600;
+  @apply text-white shadow-lg;
+}
+
+.completion-button--secondary {
+  @apply bg-slate-200 text-slate-900;
+  @apply hover:bg-slate-300;
+}
+
+/* Confetti Animation */
+.confetti-container {
+  @apply absolute inset-0 pointer-events-none overflow-hidden;
+}
+
+.confetti {
+  @apply absolute w-2 h-2 rounded-full;
+  animation: confetti-fall 3s ease-in forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cube-facelet {
+    @apply w-6 h-6;
+  }
+
+  .cube-face-spacer {
+    @apply w-20 h-20;
+  }
+
+  .move-notation {
+    @apply text-5xl;
+  }
+
+  .move-display {
+    @apply min-w-0 w-full;
+  }
+
+  .controls-row {
+    @apply flex-wrap;
+  }
+
+  .playback-controls {
+    @apply flex-col;
+  }
+
+  .completion-stats {
+    @apply grid-cols-1;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .cube-face--animating {
+    @apply animate-none;
+  }
+
+  .confetti {
+    @apply hidden;
+  }
+}
+
+/* Verification Status */
+.completion-verification {
+  @apply mb-6;
+}
+
+.verification-status {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg;
+  @apply border text-sm font-medium;
+}
+
+.verification-status--success {
+  @apply bg-emerald-50 border-emerald-200 text-emerald-800;
+}
+
+.verification-status--info {
+  @apply bg-blue-50 border-blue-200 text-blue-800;
+}
+
+.verification-status svg {
+  @apply flex-shrink-0;
+}
+
+.verification-status span {
+  @apply flex-1;
+}

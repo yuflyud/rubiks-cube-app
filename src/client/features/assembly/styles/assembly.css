@@ -1,0 +1,85 @@
+/**
+ * Assembly Mechanism Styles
+ *
+ * This feature is primarily logic-based and doesn't have UI components.
+ * Styles here are placeholders for potential future UI elements like
+ * solution displays, progress indicators, or algorithm visualizations.
+ */
+
+/* Solution display components (for future use) */
+.assembly-solution {
+  @apply space-y-4;
+}
+
+.assembly-increment {
+  @apply p-4 rounded-lg bg-white border border-slate-200 shadow-sm;
+  @apply transition-all duration-200;
+  @apply hover:shadow-md hover:border-slate-300;
+}
+
+.assembly-increment__step {
+  @apply text-sm font-semibold text-slate-500 mb-1;
+}
+
+.assembly-increment__notation {
+  @apply text-2xl font-bold text-slate-900;
+}
+
+.assembly-increment__description {
+  @apply text-sm text-slate-600 mt-2;
+}
+
+/* Solution metadata */
+.assembly-metadata {
+  @apply flex items-center gap-4 text-sm text-slate-600;
+}
+
+.assembly-metadata__item {
+  @apply flex items-center gap-2;
+}
+
+/* Complexity badges */
+.assembly-complexity {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+}
+
+.assembly-complexity--easy {
+  @apply bg-emerald-100 text-emerald-800;
+}
+
+.assembly-complexity--medium {
+  @apply bg-amber-100 text-amber-800;
+}
+
+.assembly-complexity--hard {
+  @apply bg-rose-100 text-rose-800;
+}
+
+/* Loading/calculating state */
+.assembly-calculating {
+  @apply flex flex-col items-center justify-center gap-4 p-8;
+  @apply text-center;
+}
+
+.assembly-calculating__spinner {
+  @apply w-12 h-12 border-4 border-blue-200 border-t-blue-600;
+  @apply rounded-full animate-spin;
+}
+
+.assembly-calculating__text {
+  @apply text-slate-600 font-medium;
+}
+
+/* Error display */
+.assembly-error {
+  @apply p-4 rounded-lg bg-rose-50 border border-rose-200;
+  @apply text-rose-900;
+}
+
+.assembly-error__title {
+  @apply font-semibold mb-2;
+}
+
+.assembly-error__message {
+  @apply text-sm;
+}
