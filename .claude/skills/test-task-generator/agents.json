@@ -1,0 +1,8 @@
+{
+  "test-task-generator": {
+    "name": "Test Task Generator",
+    "description": "Analyzes tasks.md files and generates missing unit and integration test tasks",
+    "agentFile": "test-task-generator.agent.md",
+    "color": "green"
+  }
+}

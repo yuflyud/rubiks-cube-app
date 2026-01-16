@@ -12,6 +12,9 @@ A collection of Claude Code skills following the [agentskills.io](https://agents
 | [task-breakdown](./task-breakdown/) | Sequenced implementation task planning | Intermediate |
 | [ai-prompting](./ai-prompting/) | Effective AI communication strategies | Beginner |
 | [quality-assurance](./quality-assurance/) | Testing and validation techniques | Intermediate |
+| [test-documentation-creation](./test-documentation-creation/) | Create comprehensive test cases from requirements | Intermediate |
+| [test-coverage-verification](./test-coverage-verification/) | Verify implementation matches test cases | Intermediate |
+| [requirements-test-coverage](./requirements-test-coverage/) | Verify all requirements have corresponding test cases | Intermediate |
 | [troubleshooting](./troubleshooting/) | Diagnosing and resolving common issues | Intermediate |
 | [create-steering-documents](./create-steering-documents/) | Generate .kiro/steering/ project guidelines | Intermediate |
 
